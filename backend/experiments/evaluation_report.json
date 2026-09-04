@@ -1,0 +1,23 @@
+{
+  "model_architecture": "EfficientNet-B0 (2-Stage Fine-Tuned)",
+  "test_dataset_size": 52,
+  "metrics": {
+    "test_accuracy": 0.9808,
+    "macro_f1": 0.9805,
+    "weighted_f1": 0.9805,
+    "macro_precision": 0.9846,
+    "macro_recall": 0.9808,
+    "benchmark_accuracy": 1.0,
+    "real_field_accuracy": 0.9744,
+    "generalization_gap": 0.0256
+  },
+  "quality_gate": {
+    "target_accuracy": 0.9,
+    "target_macro_f1": 0.9,
+    "passed_gate": true,
+    "status": "APPROVED_FOR_DEMO",
+    "evaluation_verdict": "Quality criteria met: High-accuracy real field generalization achieved."
+  },
+  "confusion_matrix_plot": "experiments\\confusion_matrix.png",
+  "timestamp": "2026-09-04T15:25:00Z"
+}

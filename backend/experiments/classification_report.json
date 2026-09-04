@@ -1,0 +1,93 @@
+{
+  "Cotton___Bacterial_Blight_(Karpa)": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1-score": 1.0,
+    "support": 4.0
+  },
+  "Cotton___Healthy_Leaf": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1-score": 1.0,
+    "support": 4.0
+  },
+  "Soybean___Soybean_Rust_(Tamba)": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1-score": 1.0,
+    "support": 4.0
+  },
+  "Soybean___Healthy_Leaf": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1-score": 1.0,
+    "support": 4.0
+  },
+  "Sugarcane___Red_Rot_(Kuhila)": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1-score": 1.0,
+    "support": 4.0
+  },
+  "Sugarcane___Healthy_Cane_Leaf": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1-score": 1.0,
+    "support": 4.0
+  },
+  "Onion___Purple_Blotch_(Jaambhla_Karpa)": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1-score": 1.0,
+    "support": 4.0
+  },
+  "Onion___Healthy_Leaf": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1-score": 1.0,
+    "support": 4.0
+  },
+  "Tomato___Early_Blight_(Lavkar_Karpa)": {
+    "precision": 0.8,
+    "recall": 1.0,
+    "f1-score": 0.8888888888888888,
+    "support": 4.0
+  },
+  "Tomato___Late_Blight_(Ushira_Karpa)": {
+    "precision": 1.0,
+    "recall": 0.75,
+    "f1-score": 0.8571428571428571,
+    "support": 4.0
+  },
+  "Tomato___Healthy_Leaf": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1-score": 1.0,
+    "support": 4.0
+  },
+  "Pomegranate___Bacterial_Blight_(Telya)": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1-score": 1.0,
+    "support": 4.0
+  },
+  "Pomegranate___Healthy_Leaf": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1-score": 1.0,
+    "support": 4.0
+  },
+  "accuracy": 0.9807692307692307,
+  "macro avg": {
+    "precision": 0.9846153846153847,
+    "recall": 0.9807692307692307,
+    "f1-score": 0.9804639804639805,
+    "support": 52.0
+  },
+  "weighted avg": {
+    "precision": 0.9846153846153847,
+    "recall": 0.9807692307692307,
+    "f1-score": 0.9804639804639805,
+    "support": 52.0
+  }
+}

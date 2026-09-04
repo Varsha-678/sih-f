@@ -1,0 +1,33 @@
+{
+  "dataset_version": "v1.0-curated",
+  "total_images": 520,
+  "valid_images": 520,
+  "corrupt_images": 0,
+  "duplicates": 0,
+  "near_duplicates": 0,
+  "quarantined_images": 0,
+  "rejected_images": 0,
+  "class_distribution": {
+    "Bacterial Blight (Karpa)": 40,
+    "Healthy Leaf": 200,
+    "Soybean Rust (Tamba)": 40,
+    "Red Rot (Kuhila)": 40,
+    "Healthy Cane Leaf": 40,
+    "Purple Blotch (Jaambhla Karpa)": 40,
+    "Early Blight (Lavkar Karpa)": 40,
+    "Late Blight (Ushira Karpa)": 40,
+    "Bacterial Blight (Telya)": 40
+  },
+  "class_weights": {
+    "Bacterial Blight (Karpa)": 1.4444,
+    "Healthy Leaf": 0.2889,
+    "Soybean Rust (Tamba)": 1.4444,
+    "Red Rot (Kuhila)": 1.4444,
+    "Healthy Cane Leaf": 1.4444,
+    "Purple Blotch (Jaambhla Karpa)": 1.4444,
+    "Early Blight (Lavkar Karpa)": 1.4444,
+    "Late Blight (Ushira Karpa)": 1.4444,
+    "Bacterial Blight (Telya)": 1.4444
+  },
+  "integrity_status": "PASSED_QUALITY_GATE"
+}
