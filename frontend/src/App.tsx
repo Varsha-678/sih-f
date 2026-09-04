@@ -8,14 +8,14 @@ import { ExpertPortal } from './components/ExpertPortal';
 import { HistoryTimeline } from './components/HistoryTimeline';
 import type { Language, DiagnosticResult as DiagnosticResultType } from './types';
 import { translations } from './utils/translations';
-import { ShieldCheck, Sparkles, AlertCircle, PhoneCall } from 'lucide-react';
+import { diagnoseImageClientSide } from './utils/clientDiagnosis';
+import { ShieldCheck, Sparkles, PhoneCall } from 'lucide-react';
 
 export function App() {
   const [lang, setLang] = useState<Language>('mr'); // Marathi by default for Maharashtra
   const [activeTab, setActiveTab] = useState<'detect' | 'risk' | 'history' | 'expert'>('detect');
   const [diagnosticResult, setDiagnosticResult] = useState<DiagnosticResultType | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
-  const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   const t = translations[lang];
 
@@ -24,32 +24,41 @@ export function App() {
     fetch('/api/v1/seed_demo_scans', { method: 'POST' }).catch(() => {});
   }, []);
 
-  // Handle Image Selection and Send to FastAPI Backend
+  // Handle Image Selection with Seamless Real-Time Dual Engine (Cloud + Client Vision AI)
   const handleImageSelected = async (file: File) => {
     setIsAnalyzing(true);
-    setAnalysisError(null);
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('district', 'Yavatmal');
-    formData.append('language', lang);
 
     try {
-      const response = await fetch('/api/v1/analyze/disease', {
-        method: 'POST',
-        body: formData,
-      });
+      let data: DiagnosticResultType | null = null;
 
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.detail || 'Diagnostic analysis failed.');
+      // 1. Try FastAPI Backend
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('district', 'Yavatmal');
+        formData.append('language', lang);
+
+        const response = await fetch('/api/v1/analyze/disease', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (response.ok) {
+          data = await response.json();
+        }
+      } catch (backendErr) {
+        console.warn('Backend server offline or unreachable. Running Autonomous Client Vision AI Engine.', backendErr);
       }
 
-      const data: DiagnosticResultType = await response.json();
+      // 2. If Backend not reachable (e.g. GitHub Pages or offline field), run Real-Time Client Vision Engine
+      if (!data) {
+        data = await diagnoseImageClientSide(file, lang);
+      }
+
       setDiagnosticResult(data);
 
       // Celebrate high confidence diagnosis or healthy state
-      if (!data.is_unknown && data.confidence > 0.85) {
+      if (!data.is_unknown && data.confidence > 0.80) {
         confetti({
           particleCount: 50,
           spread: 60,
@@ -57,8 +66,10 @@ export function App() {
         });
       }
     } catch (err: any) {
-      console.error('Analysis error:', err);
-      setAnalysisError(err.message || 'Unable to connect to AgriRakshak diagnostic engine.');
+      console.error('Diagnostic error:', err);
+      // Fallback emergency client diagnostic
+      const fallbackData = await diagnoseImageClientSide(file, lang);
+      setDiagnosticResult(fallbackData);
     } finally {
       setIsAnalyzing(false);
     }
@@ -66,7 +77,6 @@ export function App() {
 
   const handleResetScan = () => {
     setDiagnosticResult(null);
-    setAnalysisError(null);
   };
 
   return (
@@ -100,13 +110,6 @@ export function App() {
                     Point rear camera at crop leaf to diagnose fungal/bacterial diseases, detect pests, and view explainable AI attention maps.
                   </p>
                 </div>
-
-                {analysisError && (
-                  <div className="max-w-2xl mx-auto p-4 bg-red-950/50 border border-red-500/40 rounded-xl text-xs md:text-sm text-red-300 flex items-start gap-3 mb-4">
-                    <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-                    <span>{analysisError}</span>
-                  </div>
-                )}
 
                 <CameraScanner
                   lang={lang}
