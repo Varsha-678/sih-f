@@ -36,7 +36,7 @@ from backend.services.advisory_service import FarmerAdvisoryService
 
 app = FastAPI(
     title="AgriRakshak API",
-    description="Early Detection & Management of Crop Diseases and Pest Infestations - Govt of Maharashtra (SIH 2026)",
+    description="Early Detection & Management of Crop Diseases and Pest Infestations",
     version=APP_VERSION
 )
 
@@ -110,9 +110,22 @@ async def analyze_crop_disease(
         # Step 4: Run YOLO Pest Detection Pipeline
         pest_result = PestDetectionService.detect_pests(contents)
 
-        # Step 5: Run Severity Estimation
+        # Step 5: Run Severity Estimation with computer-vision lesion segmentation
         is_healthy = "Healthy" in ml_result["condition"]
         severity_result = SeverityEstimationService.estimate_severity(contents, is_healthy_label=is_healthy)
+
+        # Step 5b: If physical lesions are measured but top class was healthy, correct to disease profile
+        if severity_result["affected_percentage"] >= 2.5 and is_healthy:
+            # Find the top non-healthy condition from top predictions or fallback to regional rust/blight
+            disease_candidates = [p for p in ml_result["top3_predictions"] if "Healthy" not in p["condition"]]
+            if disease_candidates:
+                ml_result["crop"] = disease_candidates[0]["crop"]
+                ml_result["condition"] = disease_candidates[0]["condition"]
+                ml_result["class_key"] = disease_candidates[0]["class_name"]
+                ml_result["status"] = "Diseased"
+                ml_result["is_unknown"] = False
+                is_unknown = False
+            is_healthy = False
 
         # Step 6: Generate Grad-CAM Attention Heatmap for Explainable AI
         heatmap_url = GradCAMService.generate_attention_heatmap(
@@ -362,3 +375,46 @@ def seed_demo_scans(db: Session = Depends(get_db)):
     db.commit()
 
     return {"status": "success", "seeded_count": len(samples)}
+
+# 11. Standard POST /predict endpoint (Requirement 28)
+@app.post("/predict")
+async def standard_predict_endpoint(
+    image: UploadFile = File(...),
+    crop: Optional[str] = Form(None),
+    field: Optional[str] = Form(None),
+    db: Session = Depends(get_db)
+):
+    """
+    Standard AI Prediction Endpoint matching specifications:
+    Input: image, crop, field
+    Expected response: {
+        disease, confidence, severity, affected_area, health_status, explanation, heatmap
+    }
+    """
+    contents = await image.read()
+    
+    # Run ML Inference
+    ml_result = inference_engine.predict(contents)
+    is_healthy = "Healthy" in ml_result["condition"]
+    severity_result = SeverityEstimationService.estimate_severity(contents, is_healthy_label=is_healthy)
+    
+    # Generate Attention Heatmap
+    heatmap_url = GradCAMService.generate_attention_heatmap(
+        image_bytes=contents,
+        target_class_name=f"{ml_result['crop']} - {ml_result['condition']}",
+        confidence=ml_result["calibrated_confidence"],
+        is_unknown=ml_result["is_unknown"]
+    )
+    
+    return {
+        "disease": ml_result["condition"],
+        "confidence": ml_result["calibrated_confidence"],
+        "severity": severity_result["severity_category"],
+        "affected_area": severity_result["affected_percentage"],
+        "health_status": ml_result["status"],
+        "explanation": "AI identified visual patterns in the highlighted leaf regions that are associated with this condition.",
+        "heatmap": heatmap_url,
+        "crop": ml_result["crop"],
+        "scientific_name": ml_result["scientific_name"]
+    }
+

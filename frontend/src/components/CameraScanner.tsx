@@ -1,31 +1,60 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { Camera, RefreshCw, Upload, Sparkles, AlertTriangle, CheckCircle2, Focus } from 'lucide-react';
-import type { Language } from '../types';
+import { 
+  Camera, RefreshCw, Upload, Sparkles, AlertTriangle, 
+  CheckCircle2, Focus, Volume2, VolumeX, Zap
+} from 'lucide-react';
+import type { Language, QualityEvaluation } from '../types';
 import { translations } from '../utils/translations';
+import { evaluateImageQualityClient, speakGuidance } from '../utils/clientDiagnosis';
 
 interface CameraScannerProps {
   lang: Language;
-  onImageSelected: (file: File, previewUrl: string) => void;
+  onImageSelected: (file: File, previewUrl: string, selectedCrop?: string) => void;
   isAnalyzing?: boolean;
+  voiceEnabled: boolean;
+  onToggleVoice: () => void;
 }
 
 export const CameraScanner: React.FC<CameraScannerProps> = ({
   lang,
   onImageSelected,
-  isAnalyzing = false
+  isAnalyzing = false,
+  voiceEnabled,
+  onToggleVoice
 }) => {
   const t = translations[lang];
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const dropZoneRef = useRef<HTMLDivElement | null>(null);
 
+  const [selectedCrop, setSelectedCrop] = useState<string>('All / Auto-Detect');
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [capturedPreview, setCapturedPreview] = useState<string | null>(null);
   const [capturedFile, setCapturedFile] = useState<File | null>(null);
+  const [qualityEval, setQualityEval] = useState<QualityEvaluation | null>(null);
+  const [showQualityModal, setShowQualityModal] = useState<boolean>(false);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [scanStepIndex, setScanStepIndex] = useState<number>(0);
+
+  const cropOptions = [
+    { label: t.cropAll, value: 'All / Auto-Detect' },
+    { label: 'Tomato', value: 'Tomato' },
+    { label: 'Potato', value: 'Potato' },
+    { label: 'Rice', value: 'Rice' },
+    { label: 'Cotton', value: 'Cotton' },
+    { label: 'Maize', value: 'Maize' },
+    { label: 'Chilli', value: 'Chilli' },
+    { label: 'Groundnut', value: 'Groundnut' },
+    { label: 'Soybean', value: 'Soybean' },
+    { label: 'Sugarcane', value: 'Sugarcane' },
+    { label: 'Onion', value: 'Onion' },
+    { label: 'Pomegranate', value: 'Pomegranate' },
+  ];
 
   // Stop camera stream utility
   const stopCameraStream = useCallback(() => {
@@ -36,20 +65,21 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
     setIsCameraActive(false);
   }, [stream]);
 
-  // Start real browser camera with WebRTC getUserMedia
+  // Start WebRTC Camera
   const startCamera = async (facing: 'environment' | 'user' = facingMode) => {
     setCameraError(null);
     setCapturedPreview(null);
     setCapturedFile(null);
+    setQualityEval(null);
+    setShowQualityModal(false);
 
-    // Stop existing stream if running
     if (stream) {
       stream.getTracks().forEach((t) => t.stop());
     }
 
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('Camera API (getUserMedia) is not supported in this browser environment.');
+        throw new Error('Camera API is not supported in this browser environment.');
       }
 
       const constraints: MediaStreamConstraints = {
@@ -69,6 +99,10 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
         videoRef.current.srcObject = mediaStream;
         videoRef.current.play().catch((err) => console.error('Video play error:', err));
       }
+
+      if (voiceEnabled) {
+        speakGuidance(t.voiceKeepInside, lang);
+      }
     } catch (err: any) {
       console.warn('Camera initiation failed:', err);
       setCameraError('Camera access is unavailable. Please check permissions or upload an image instead.');
@@ -81,6 +115,29 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
     const nextFacing = facingMode === 'environment' ? 'user' : 'environment';
     setFacingMode(nextFacing);
     startCamera(nextFacing);
+  };
+
+  // Process selected or captured image
+  const processImageFile = async (file: File) => {
+    const preview = URL.createObjectURL(file);
+    setCapturedPreview(preview);
+    setCapturedFile(file);
+    stopCameraStream();
+
+    // Run Pre-Scan Image Quality Check
+    const quality = await evaluateImageQualityClient(file);
+    setQualityEval(quality);
+
+    if (quality.quality === 'POOR' || quality.quality === 'LOW_RESOLUTION' || !quality.can_analyze) {
+      setShowQualityModal(true);
+      if (voiceEnabled) {
+        speakGuidance(t.voiceRetake, lang);
+      }
+    } else {
+      if (voiceEnabled) {
+        speakGuidance(t.voiceCaptured, lang);
+      }
+    }
   };
 
   // Capture frame from video stream
@@ -100,29 +157,41 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
     canvas.toBlob((blob) => {
       if (blob) {
         const file = new File([blob], `crop_scan_${Date.now()}.jpg`, { type: 'image/jpeg' });
-        const preview = URL.createObjectURL(blob);
-        setCapturedPreview(preview);
-        setCapturedFile(file);
-        stopCameraStream();
+        processImageFile(file);
       }
     }, 'image/jpeg', 0.95);
   };
 
-  // Gallery file upload handler
+  // File Input Handler
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const preview = URL.createObjectURL(file);
-      setCapturedPreview(preview);
-      setCapturedFile(file);
-      stopCameraStream();
+      processImageFile(e.target.files[0]);
     }
   };
 
-  // Trigger analysis
+  // Drag & Drop Handlers
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      processImageFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  // Trigger Final Analysis
   const handleConfirmAndAnalyze = () => {
     if (capturedFile && capturedPreview) {
-      onImageSelected(capturedFile, capturedPreview);
+      setShowQualityModal(false);
+      onImageSelected(capturedFile, capturedPreview, selectedCrop);
     }
   };
 
@@ -130,8 +199,22 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   const handleRetake = () => {
     setCapturedPreview(null);
     setCapturedFile(null);
+    setQualityEval(null);
+    setShowQualityModal(false);
     startCamera(facingMode);
   };
+
+  // 7-Stage Animated Scan Sequence during analysis
+  useEffect(() => {
+    if (!isAnalyzing) {
+      setScanStepIndex(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setScanStepIndex((prev) => (prev + 1) % 7);
+    }, 600);
+    return () => clearInterval(interval);
+  }, [isAnalyzing]);
 
   // Clean up stream on unmount
   useEffect(() => {
@@ -143,7 +226,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   }, [stream]);
 
   return (
-    <div className="w-full max-w-2xl mx-auto glass-panel rounded-2xl p-4 md:p-6 shadow-2xl border border-emerald-500/20">
+    <div className="w-full max-w-3xl mx-auto space-y-6">
       {/* Hidden elements */}
       <canvas ref={canvasRef} className="hidden" />
       <input
@@ -154,149 +237,324 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
         className="hidden"
       />
 
-      {/* Header Banner */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className="text-lg md:text-xl font-bold text-white flex items-center gap-2">
-            <Focus className="w-5 h-5 text-emerald-400" />
-            {t.scanMyCrop}
-          </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Hold camera steady over leaf surface for blur-free diagnosis
-          </p>
+      {/* 1. Crop Selection Pill Bar */}
+      <div className="glass-panel p-4 rounded-2xl border border-slate-800 space-y-2.5">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <Zap className="w-3.5 h-3.5 text-emerald-400" />
+            {t.selectCropLabel}
+          </label>
+          <button
+            onClick={onToggleVoice}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition ${
+              voiceEnabled
+                ? 'bg-emerald-950/80 border-emerald-500/40 text-emerald-300'
+                : 'bg-slate-900 border-slate-800 text-slate-400'
+            }`}
+          >
+            {voiceEnabled ? <Volume2 className="w-3.5 h-3.5 text-emerald-400" /> : <VolumeX className="w-3.5 h-3.5" />}
+            <span>{voiceEnabled ? t.voiceEnabled : t.voiceDisabled}</span>
+          </button>
         </div>
 
-        {isCameraActive && (
-          <button
-            onClick={toggleCameraFacing}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-emerald-300 border border-slate-700"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            {t.switchCamera}
-          </button>
-        )}
-      </div>
-
-      {/* Main Viewfinder Box */}
-      <div className="relative w-full aspect-[4/3] max-h-[420px] rounded-xl overflow-hidden bg-slate-950 border-2 border-dashed border-slate-700 flex items-center justify-center">
-        {/* Live Camera Stream */}
-        {isCameraActive && (
-          <div className="relative w-full h-full">
-            <video
-              ref={videoRef}
-              playsInline
-              autoPlay
-              muted
-              className="w-full h-full object-cover"
-            />
-            {/* Real-time Focus Reticle Overlay */}
-            <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-8">
-              <div className="w-48 h-48 md:w-64 md:h-64 border-2 border-emerald-400/70 rounded-2xl relative animate-pulse-slow">
-                <div className="absolute -top-1 -left-1 w-4 h-4 border-t-4 border-l-4 border-emerald-400" />
-                <div className="absolute -top-1 -right-1 w-4 h-4 border-t-4 border-r-4 border-emerald-400" />
-                <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-4 border-l-4 border-emerald-400" />
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-4 border-r-4 border-emerald-400" />
-                <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent absolute top-1/2 -translate-y-1/2 animate-scan-radar" />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Captured Preview */}
-        {!isCameraActive && capturedPreview && (
-          <div className="relative w-full h-full">
-            <img
-              src={capturedPreview}
-              alt="Captured crop scan"
-              className="w-full h-full object-contain bg-black/60"
-            />
-            <div className="absolute top-3 left-3 bg-emerald-950/80 backdrop-blur border border-emerald-500/40 text-emerald-300 text-xs px-2.5 py-1 rounded-full flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Image Ready</span>
-            </div>
-          </div>
-        )}
-
-        {/* Idle / Camera Off State */}
-        {!isCameraActive && !capturedPreview && (
-          <div className="text-center p-6 space-y-4 max-w-sm">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-950/60 border border-emerald-500/30 flex items-center justify-center mx-auto shadow-inner">
-              <Camera className="w-8 h-8 text-emerald-400" />
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-white mb-1">
-                {t.cameraPreview}
-              </h3>
-              <p className="text-xs text-slate-400">
-                Launch camera or select photo from storage to begin high-accuracy detection.
-              </p>
-            </div>
-
-            {cameraError && (
-              <div className="p-3 bg-red-950/40 border border-red-500/30 rounded-lg text-xs text-red-300 flex items-start gap-2 text-left">
-                <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                <span>{cameraError}</span>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Action Controls */}
-      <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
-        {/* State 1: Camera is Active */}
-        {isCameraActive && (
-          <button
-            onClick={capturePhoto}
-            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 transition-transform active:scale-95"
-          >
-            <Camera className="w-4 h-4" />
-            {t.capturePhoto}
-          </button>
-        )}
-
-        {/* State 2: Photo is Captured & Ready */}
-        {!isCameraActive && capturedPreview && (
-          <>
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {cropOptions.map((crop) => (
             <button
-              onClick={handleRetake}
-              disabled={isAnalyzing}
-              className="w-full sm:w-1/2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 flex items-center justify-center gap-2"
+              key={crop.value}
+              onClick={() => setSelectedCrop(crop.value)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                selectedCrop === crop.value
+                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20 font-bold'
+                  : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800'
+              }`}
+            >
+              {crop.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 2. Visual Scanning Frame & Camera Box */}
+      <div className="glass-panel rounded-2xl p-4 md:p-6 shadow-2xl border border-emerald-500/20 space-y-4">
+        {/* Header Banner */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg md:text-xl font-extrabold text-white flex items-center gap-2 font-['Outfit']">
+              <Focus className="w-5 h-5 text-emerald-400" />
+              {t.scanMyCrop}
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {t.scanSubtitle}
+            </p>
+          </div>
+
+          {isCameraActive && (
+            <button
+              onClick={toggleCameraFacing}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-emerald-300 border border-slate-700 cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              {t.retake}
+              {t.switchCamera}
             </button>
-            <button
-              onClick={handleConfirmAndAnalyze}
-              disabled={isAnalyzing}
-              className="w-full sm:w-1/2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-transform active:scale-95"
-            >
-              <Sparkles className="w-4 h-4" />
-              {isAnalyzing ? t.analyzingText : t.analyzeNow}
-            </button>
-          </>
-        )}
+          )}
+        </div>
 
-        {/* State 3: Idle / Start Options */}
-        {!isCameraActive && !capturedPreview && (
-          <>
+        {/* Viewfinder Frame */}
+        <div
+          ref={dropZoneRef}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`relative w-full aspect-[4/3] max-h-[420px] rounded-2xl overflow-hidden bg-slate-950 border-2 transition-all flex items-center justify-center ${
+            isDragging
+              ? 'border-emerald-400 bg-emerald-950/30 scale-[1.01]'
+              : 'border-dashed border-slate-700'
+          }`}
+        >
+          {/* Live Camera Stream */}
+          {isCameraActive && (
+            <div className="relative w-full h-full">
+              <video
+                ref={videoRef}
+                playsInline
+                autoPlay
+                muted
+                className="w-full h-full object-cover"
+              />
+              {/* Real-time Focus Reticle & Laser */}
+              <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-8">
+                <div className="w-48 h-48 md:w-64 md:h-64 border-2 border-emerald-400/80 rounded-2xl relative animate-pulse-slow">
+                  <div className="absolute -top-1 -left-1 w-5 h-5 border-t-4 border-l-4 border-emerald-400" />
+                  <div className="absolute -top-1 -right-1 w-5 h-5 border-t-4 border-r-4 border-emerald-400" />
+                  <div className="absolute -bottom-1 -left-1 w-5 h-5 border-b-4 border-l-4 border-emerald-400" />
+                  <div className="absolute -bottom-1 -right-1 w-5 h-5 border-b-4 border-r-4 border-emerald-400" />
+                  <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent absolute top-1/2 -translate-y-1/2 animate-scan-radar" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Captured Preview */}
+          {!isCameraActive && capturedPreview && (
+            <div className="relative w-full h-full">
+              <img
+                src={capturedPreview}
+                alt="Captured crop scan"
+                className="w-full h-full object-contain bg-black/60"
+              />
+
+              {/* Analysis Animation Overlay */}
+              {isAnalyzing && (
+                <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 space-y-4">
+                  <div className="relative w-20 h-20">
+                    <div className="absolute inset-0 rounded-full border-4 border-emerald-500/20 border-t-emerald-400 animate-spin" />
+                    <div className="absolute inset-2 rounded-full border-4 border-teal-500/20 border-b-teal-400 animate-spin-reverse" />
+                    <Sparkles className="w-8 h-8 text-emerald-400 absolute inset-0 m-auto animate-pulse" />
+                  </div>
+
+                  <div className="text-center space-y-1">
+                    <h4 className="text-sm font-bold text-white font-['Outfit']">
+                      AI Multi-Stage Crop Health Analysis
+                    </h4>
+                    <p className="text-xs text-emerald-400 font-semibold">
+                      {scanStepIndex === 0 && 'Stage 01/07 — Normalizing and preprocessing foliar image...'}
+                      {scanStepIndex === 1 && 'Stage 02/07 — Verifying crop identity and leaf boundaries...'}
+                      {scanStepIndex === 2 && 'Stage 03/07 — Examining foliar discoloration & symptom patterns...'}
+                      {scanStepIndex === 3 && 'Stage 04/07 — Matching neural embeddings with disease classes...'}
+                      {scanStepIndex === 4 && 'Stage 05/07 — Estimating lesion severity & affected foliar area %...'}
+                      {scanStepIndex === 5 && 'Stage 06/07 — Calculating agro-climatic disease risk & score...'}
+                      {scanStepIndex === 6 && 'Stage 07/07 — Formulating safe IPM recommendations & advisory...'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {!isAnalyzing && (
+                <div className="absolute top-3 left-3 bg-emerald-950/90 backdrop-blur border border-emerald-500/40 text-emerald-300 text-xs px-3 py-1 rounded-full flex items-center gap-1.5 font-semibold">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Image Staged</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Idle / Off State */}
+          {!isCameraActive && !capturedPreview && (
+            <div className="text-center p-6 space-y-4 max-w-md">
+              <div className="w-16 h-16 rounded-2xl bg-emerald-950/60 border border-emerald-500/30 flex items-center justify-center mx-auto shadow-inner">
+                <Camera className="w-8 h-8 text-emerald-400" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold text-white font-['Outfit']">
+                  {t.cameraPreview}
+                </h3>
+                <p className="text-xs text-slate-400">
+                  {t.dragDropText}{' '}
+                  <span
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-emerald-400 font-semibold underline cursor-pointer"
+                  >
+                    {t.browseFiles}
+                  </span>
+                </p>
+              </div>
+
+              {cameraError && (
+                <div className="p-3 bg-red-950/40 border border-red-500/30 rounded-xl text-xs text-red-300 flex items-start gap-2 text-left">
+                  <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                  <span>{cameraError}</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* 3. Visual Guidance Bar */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-center">
+          <div className="p-2 rounded-xl bg-slate-900/60 border border-slate-800 text-[11px] text-slate-300 flex items-center justify-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span>{t.guidance1}</span>
+          </div>
+          <div className="p-2 rounded-xl bg-slate-900/60 border border-slate-800 text-[11px] text-slate-300 flex items-center justify-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+            <span>{t.guidance2}</span>
+          </div>
+          <div className="p-2 rounded-xl bg-slate-900/60 border border-slate-800 text-[11px] text-slate-300 flex items-center justify-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+            <span>{t.guidance3}</span>
+          </div>
+        </div>
+
+        {/* 4. Action Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          {isCameraActive && (
             <button
-              onClick={() => startCamera('environment')}
-              className="w-full sm:w-1/2 px-5 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-transform active:scale-95"
+              onClick={capturePhoto}
+              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 transition-transform active:scale-95 cursor-pointer"
             >
               <Camera className="w-4 h-4" />
-              {t.scanNow}
+              {t.capturePhoto}
             </button>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full sm:w-1/2 px-5 py-3 rounded-xl bg-slate-800/90 hover:bg-slate-800 text-slate-200 font-semibold text-sm border border-slate-700 flex items-center justify-center gap-2 transition-colors"
-            >
-              <Upload className="w-4 h-4 text-emerald-400" />
-              {t.uploadGallery}
-            </button>
-          </>
-        )}
+          )}
+
+          {!isCameraActive && capturedPreview && (
+            <>
+              <button
+                onClick={handleRetake}
+                disabled={isAnalyzing}
+                className="w-full sm:w-1/2 px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-xs border border-slate-700 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                {t.retake}
+              </button>
+              <button
+                onClick={handleConfirmAndAnalyze}
+                disabled={isAnalyzing}
+                className="w-full sm:w-1/2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-transform active:scale-95 cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4" />
+                {isAnalyzing ? t.analyzingText : t.analyzeNow}
+              </button>
+            </>
+          )}
+
+          {!isCameraActive && !capturedPreview && (
+            <>
+              <button
+                onClick={() => startCamera('environment')}
+                className="w-full sm:w-1/2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-transform active:scale-95 cursor-pointer"
+              >
+                <Camera className="w-4 h-4" />
+                {t.scanNow}
+              </button>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full sm:w-1/2 px-6 py-3.5 rounded-2xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 font-bold text-sm border border-slate-700 flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              >
+                <Upload className="w-4 h-4 text-emerald-400" />
+                {t.uploadGallery}
+              </button>
+            </>
+          )}
+        </div>
       </div>
+
+      {/* 5. Pre-Scan Quality Assessment Modal if Quality is Sub-optimal */}
+      {showQualityModal && qualityEval && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="glass-panel rounded-3xl p-6 max-w-md w-full border border-amber-500/40 space-y-4 shadow-2xl">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-amber-950/80 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white font-['Outfit']">
+                  {t.qualityCheckTitle}
+                </h3>
+                <p className="text-xs text-amber-300 font-medium">
+                  {t.qualityLow}
+                </p>
+              </div>
+            </div>
+
+            {/* Quality Score Breakdown */}
+            <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-slate-400">{t.sharpness}:</span>
+                <span className={`font-semibold ${qualityEval.blur_score < 35 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                  {qualityEval.blur_score} (Score)
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">{t.brightness}:</span>
+                <span className={`font-semibold ${qualityEval.brightness_score < 45 || qualityEval.brightness_score > 230 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                  {qualityEval.brightness_score} / 255
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">{t.leafCoverage}:</span>
+                <span className={`font-semibold ${qualityEval.leaf_coverage < 20 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                  {qualityEval.leaf_coverage}%
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">{t.resolution}:</span>
+                <span className="text-slate-200 font-mono font-semibold">{qualityEval.resolution}</span>
+              </div>
+            </div>
+
+            {/* Suggestions */}
+            {qualityEval.suggestions && qualityEval.suggestions.length > 0 && (
+              <div className="space-y-1">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                  How to improve:
+                </span>
+                <ul className="text-xs text-slate-300 space-y-1 pl-4 list-disc">
+                  {qualityEval.suggestions.map((s, idx) => (
+                    <li key={idx}>{s}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Modal Actions */}
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                onClick={handleRetake}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-md shadow-emerald-500/20 cursor-pointer"
+              >
+                {t.retakePhotoBtn}
+              </button>
+              <button
+                onClick={handleConfirmAndAnalyze}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 cursor-pointer"
+              >
+                {t.proceedAnyway}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -48,22 +48,22 @@
     "support": 4.0
   },
   "Tomato___Early_Blight_(Lavkar_Karpa)": {
-    "precision": 0.8,
-    "recall": 1.0,
-    "f1-score": 0.8888888888888888,
+    "precision": 0.5,
+    "recall": 0.75,
+    "f1-score": 0.6,
     "support": 4.0
   },
   "Tomato___Late_Blight_(Ushira_Karpa)": {
-    "precision": 1.0,
-    "recall": 0.75,
-    "f1-score": 0.8571428571428571,
+    "precision": 0.5,
+    "recall": 0.25,
+    "f1-score": 0.3333333333333333,
     "support": 4.0
   },
   "Tomato___Healthy_Leaf": {
     "precision": 1.0,
     "recall": 1.0,
     "f1-score": 1.0,
-    "support": 4.0
+    "support": 3.0
   },
   "Pomegranate___Bacterial_Blight_(Telya)": {
     "precision": 1.0,
@@ -77,17 +77,17 @@
     "f1-score": 1.0,
     "support": 4.0
   },
-  "accuracy": 0.9807692307692307,
+  "accuracy": 0.9215686274509803,
   "macro avg": {
-    "precision": 0.9846153846153847,
-    "recall": 0.9807692307692307,
-    "f1-score": 0.9804639804639805,
-    "support": 52.0
+    "precision": 0.9230769230769231,
+    "recall": 0.9230769230769231,
+    "f1-score": 0.917948717948718,
+    "support": 51.0
   },
   "weighted avg": {
-    "precision": 0.9846153846153847,
-    "recall": 0.9807692307692307,
-    "f1-score": 0.9804639804639805,
-    "support": 52.0
+    "precision": 0.9215686274509803,
+    "recall": 0.9215686274509803,
+    "f1-score": 0.9163398692810457,
+    "support": 51.0
   }
 }
