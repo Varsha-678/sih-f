@@ -14,7 +14,7 @@ export const SpreadTimeline: React.FC<SpreadTimelineProps> = ({
   lang,
   currentResult
 }) => {
-  const t = translations[lang];
+  const t = translations[lang] || translations.en;
 
   // Demo timeline points simulating disease progression across 15 days
   const basePoints: SpreadTimelinePoint[] = [

@@ -16,7 +16,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   onMarkAllRead,
   onNotificationClick
 }) => {
-  const t = translations[lang];
+  const t = translations[lang] || translations.en;
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 

@@ -11,7 +11,7 @@ interface RiskRadarMapProps {
 }
 
 export const RiskRadarMap: React.FC<RiskRadarMapProps> = ({ lang }) => {
-  const t = translations[lang];
+  const t = translations[lang] || translations.en;
 
   const [hotspots, setHotspots] = useState<DistrictHotspot[]>([]);
   const [selectedDistrict, setSelectedDistrict] = useState<DistrictHotspot | null>(null);

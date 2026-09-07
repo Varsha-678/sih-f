@@ -14,7 +14,7 @@ export const SymptomAssistant: React.FC<SymptomAssistantProps> = ({
   lang,
   onNavigateToScan
 }) => {
-  const t = translations[lang];
+  const t = translations[lang] || translations.en;
 
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [selectedCrop, setSelectedCrop] = useState<string>('Cotton');

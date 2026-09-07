@@ -31,11 +31,14 @@ export const Navbar: React.FC<NavbarProps> = ({
   const t = translations[lang] || translations.en;
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
-  const languages: Array<{ code: Language; label: string }> = [
-    { code: 'en', label: 'English' },
-    { code: 'mr', label: 'मराठी' },
-    { code: 'hi', label: 'हिंदी' },
-    { code: 'ta', label: 'தமிழ்' },
+  const languages: Array<{ code: Language; label: string; short: string }> = [
+    { code: 'en', label: 'English', short: 'EN' },
+    { code: 'mr', label: 'मराठी', short: 'MR' },
+    { code: 'hi', label: 'हिंदी', short: 'HI' },
+    { code: 'ta', label: 'தமிழ்', short: 'TA' },
+    { code: 'te', label: 'తెలుగు', short: 'TE' },
+    { code: 'kn', label: 'ಕನ್ನಡ', short: 'KN' },
+    { code: 'gu', label: 'ગુજરાતી', short: 'GU' },
   ];
 
   const handleNavClick = (tab: NavTab) => {
@@ -44,12 +47,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-50 glass-panel border-b border-emerald-500/20 px-4 py-2.5 shadow-lg">
+    <header className="sticky top-0 z-50 glass-panel border-b border-emerald-500/20 px-3 sm:px-4 py-2.5 shadow-lg">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
         {/* Brand & Identity */}
         <div 
           onClick={() => handleNavClick('home')}
-          className="flex items-center gap-3 cursor-pointer group shrink-0"
+          className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group shrink-0"
         >
           <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 p-0.5 shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
             <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
@@ -58,15 +61,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold tracking-tight text-white font-['Outfit']">
+              <h1 className="text-base sm:text-lg font-bold tracking-tight text-white font-['Outfit']">
                 {t.appName}
               </h1>
               <span className="hidden sm:inline text-[9px] font-semibold uppercase px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-500/30">
                 AI Vision
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 font-medium hidden sm:block">
-              Early Crop Disease & Health Intelligence
+            <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium hidden sm:block">
+              {t.tagline}
             </p>
           </div>
         </div>
@@ -82,7 +85,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <Home className="w-3.5 h-3.5" />
-            <span>Home</span>
+            <span>{t.tabHome}</span>
           </button>
 
           <button
@@ -94,7 +97,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <Camera className="w-3.5 h-3.5" />
-            <span>Disease Detection</span>
+            <span>{t.tabDetect}</span>
           </button>
 
           <button
@@ -106,7 +109,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <Activity className="w-3.5 h-3.5" />
-            <span>Crop Health</span>
+            <span>{t.tabCropHealth}</span>
           </button>
 
           <button
@@ -118,7 +121,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Risk Monitor</span>
+            <span>{t.tabRiskRadar}</span>
           </button>
 
           <button
@@ -130,7 +133,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <MapPin className="w-3.5 h-3.5" />
-            <span>Fields</span>
+            <span>{t.tabFields}</span>
           </button>
 
           <button
@@ -142,7 +145,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <History className="w-3.5 h-3.5" />
-            <span>Scan History</span>
+            <span>{t.tabHistory}</span>
           </button>
 
           <button
@@ -154,7 +157,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <BookOpen className="w-3.5 h-3.5" />
-            <span>Disease Library</span>
+            <span>{t.tabLibrary}</span>
           </button>
 
           <button
@@ -166,7 +169,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <GraduationCap className="w-3.5 h-3.5" />
-            <span>Learn</span>
+            <span>{t.tabLearn}</span>
           </button>
 
           <button
@@ -178,28 +181,28 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <Info className="w-3.5 h-3.5" />
-            <span>About</span>
+            <span>{t.tabAbout}</span>
           </button>
         </nav>
 
         {/* Right Action Bar */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           {/* Primary CTA: Analyze Crop */}
           <button
             onClick={() => handleNavClick('detect')}
-            className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-extrabold text-xs shadow-md shadow-emerald-500/20 cursor-pointer"
+            className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-extrabold text-xs shadow-md shadow-emerald-500/20 cursor-pointer"
           >
             <Camera className="w-3.5 h-3.5" />
-            <span>Analyze Crop</span>
+            <span>{t.btnAnalyzeCrop}</span>
           </button>
 
           {/* Secondary Dashboard Link */}
           <button
             onClick={() => handleNavClick('crophealth')}
-            className="hidden md:flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700 cursor-pointer"
+            className="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700 cursor-pointer"
           >
             <LayoutDashboard className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Dashboard</span>
+            <span>{t.tabDashboard}</span>
           </button>
 
           {/* Notifications Center */}
@@ -210,20 +213,21 @@ export const Navbar: React.FC<NavbarProps> = ({
             onNotificationClick={onNotificationClick}
           />
 
-          {/* Language Switcher */}
-          <div className="hidden lg:flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-xs">
-            <Globe className="w-3.5 h-3.5 text-slate-400 ml-1 mr-0.5" />
+          {/* Language Switcher with 7 Languages */}
+          <div className="hidden lg:flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-xs gap-0.5">
+            <Globe className="w-3.5 h-3.5 text-slate-400 ml-1 mr-0.5 shrink-0" />
             {languages.map((l) => (
               <button
                 key={l.code}
                 onClick={() => onLanguageChange(l.code)}
-                className={`px-2 py-1 font-bold rounded-lg transition-colors cursor-pointer ${
+                title={l.label}
+                className={`px-1.5 py-1 text-[11px] font-bold rounded-lg transition-colors cursor-pointer ${
                   lang === l.code
                     ? 'bg-emerald-500 text-slate-950 shadow'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                {l.code.toUpperCase()}
+                {l.short}
               </button>
             ))}
           </div>
@@ -241,6 +245,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="xl:hidden pt-3 pb-2 border-t border-slate-800 mt-2 space-y-3 animate-fadeIn">
+          {/* Mobile Navigation Links */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-xs font-semibold">
             <button
               onClick={() => handleNavClick('home')}
@@ -249,7 +254,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Home className="w-4 h-4" />
-              <span>Home</span>
+              <span>{t.tabHome}</span>
             </button>
 
             <button
@@ -259,7 +264,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Camera className="w-4 h-4" />
-              <span>Disease Detection</span>
+              <span>{t.tabDetect}</span>
             </button>
 
             <button
@@ -269,7 +274,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Activity className="w-4 h-4" />
-              <span>Crop Health</span>
+              <span>{t.tabCropHealth}</span>
             </button>
 
             <button
@@ -279,7 +284,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Sparkles className="w-4 h-4" />
-              <span>Risk Monitor</span>
+              <span>{t.tabRiskRadar}</span>
             </button>
 
             <button
@@ -289,7 +294,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <MapPin className="w-4 h-4" />
-              <span>Fields</span>
+              <span>{t.tabFields}</span>
             </button>
 
             <button
@@ -299,7 +304,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <History className="w-4 h-4" />
-              <span>Scan History</span>
+              <span>{t.tabHistory}</span>
             </button>
 
             <button
@@ -309,7 +314,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <BookOpen className="w-4 h-4" />
-              <span>Disease Library</span>
+              <span>{t.tabLibrary}</span>
             </button>
 
             <button
@@ -319,7 +324,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <GraduationCap className="w-4 h-4" />
-              <span>Learn</span>
+              <span>{t.tabLearn}</span>
             </button>
 
             <button
@@ -329,24 +334,24 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Info className="w-4 h-4" />
-              <span>About</span>
+              <span>{t.tabAbout}</span>
             </button>
           </div>
 
-          {/* Mobile Language Switcher */}
-          <div className="flex items-center justify-between bg-slate-900/90 p-2 rounded-xl border border-slate-800 text-xs">
-            <span className="text-slate-400 font-semibold flex items-center gap-1">
-              <Globe className="w-3.5 h-3.5" /> Language:
+          {/* Mobile Language Switcher (All 7 languages) */}
+          <div className="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 space-y-2">
+            <span className="text-slate-400 font-semibold text-xs flex items-center gap-1.5">
+              <Globe className="w-3.5 h-3.5 text-emerald-400" /> Choose Native Language:
             </span>
-            <div className="flex items-center gap-1">
+            <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 text-xs">
               {languages.map((l) => (
                 <button
                   key={l.code}
                   onClick={() => onLanguageChange(l.code)}
-                  className={`px-2 py-1 font-bold rounded-lg transition-colors ${
+                  className={`px-2 py-1.5 font-bold rounded-lg transition-colors text-center ${
                     lang === l.code
                       ? 'bg-emerald-500 text-slate-950 shadow'
-                      : 'text-slate-400 hover:text-white'
+                      : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
                   }`}
                 >
                   {l.label}

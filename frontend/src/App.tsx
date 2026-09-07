@@ -34,6 +34,7 @@ export function App() {
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [voiceEnabled, setVoiceEnabled] = useState<boolean>(true);
   const [activeFieldId, setActiveFieldId] = useState<string>('field-1');
+  const t = translations[lang] || translations.en;
 
   // Fields State
   const [fields, setFields] = useState<Field[]>([
@@ -487,12 +488,12 @@ export function App() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>AgriRakshak • AI Crop Disease Detection & Health Intelligence Platform</span>
+            <span>{t.appName} • {t.tagline}</span>
           </div>
 
           <div className="flex items-center gap-4">
             <span className="text-[11px] text-slate-500 italic hidden md:inline">
-              {translations[lang].aiDisclaimer}
+              {t.aiDisclaimer}
             </span>
 
             <a
@@ -500,7 +501,7 @@ export function App() {
               className="flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 font-bold"
             >
               <PhoneCall className="w-3.5 h-3.5" />
-              <span>Kisan Helpline: 1800-180-1551</span>
+              <span>{t.kisanHelpline}: 1800-180-1551</span>
             </a>
           </div>
         </div>

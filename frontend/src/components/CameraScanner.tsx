@@ -1,7 +1,8 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { 
-  Camera, RefreshCw, Upload, Sparkles, AlertTriangle, 
-  CheckCircle2, Focus, Volume2, VolumeX, Zap
+  Camera, Upload, RefreshCw, AlertTriangle, 
+  CheckCircle2, Sparkles, Volume2, VolumeX, Focus,
+  Zap
 } from 'lucide-react';
 import type { Language, QualityEvaluation } from '../types';
 import { translations } from '../utils/translations';
@@ -22,7 +23,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   voiceEnabled,
   onToggleVoice
 }) => {
-  const t = translations[lang];
+  const t = translations[lang] || translations.en;
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -43,17 +44,17 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
 
   const cropOptions = [
     { label: t.cropAll, value: 'All / Auto-Detect' },
-    { label: 'Tomato', value: 'Tomato' },
-    { label: 'Potato', value: 'Potato' },
-    { label: 'Rice', value: 'Rice' },
-    { label: 'Cotton', value: 'Cotton' },
-    { label: 'Maize', value: 'Maize' },
-    { label: 'Chilli', value: 'Chilli' },
-    { label: 'Groundnut', value: 'Groundnut' },
-    { label: 'Soybean', value: 'Soybean' },
-    { label: 'Sugarcane', value: 'Sugarcane' },
-    { label: 'Onion', value: 'Onion' },
-    { label: 'Pomegranate', value: 'Pomegranate' },
+    { label: t.cropTomato, value: 'Tomato' },
+    { label: t.cropPotato, value: 'Potato' },
+    { label: t.cropRice, value: 'Rice' },
+    { label: t.cropCotton, value: 'Cotton' },
+    { label: t.cropMaize, value: 'Maize' },
+    { label: t.cropSoybean, value: 'Soybean' },
+    { label: t.cropSugarcane, value: 'Sugarcane' },
+    { label: t.cropOnion, value: 'Onion' },
+    { label: t.cropPomegranate, value: 'Pomegranate' },
+    { label: t.cropChilli, value: 'Chilli' },
+    { label: t.cropWheat, value: 'Wheat' },
   ];
 
   // Stop camera stream utility
@@ -65,28 +66,22 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
     setIsCameraActive(false);
   }, [stream]);
 
-  // Start WebRTC Camera
-  const startCamera = async (facing: 'environment' | 'user' = facingMode) => {
+  // Start live WebRTC video stream
+  const startCamera = async (facing: 'environment' | 'user' = 'environment') => {
     setCameraError(null);
-    setCapturedPreview(null);
-    setCapturedFile(null);
-    setQualityEval(null);
-    setShowQualityModal(false);
+    stopCameraStream();
 
-    if (stream) {
-      stream.getTracks().forEach((t) => t.stop());
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCameraError(t.cameraUnavailable);
+      return;
     }
 
     try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('Camera API is not supported in this browser environment.');
-      }
-
       const constraints: MediaStreamConstraints = {
         video: {
           facingMode: { ideal: facing },
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
         },
         audio: false
       };
@@ -105,7 +100,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
       }
     } catch (err: any) {
       console.warn('Camera initiation failed:', err);
-      setCameraError('Camera access is unavailable. Please check permissions or upload an image instead.');
+      setCameraError(t.cameraUnavailable);
       setIsCameraActive(false);
     }
   };
@@ -135,7 +130,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
       }
     } else {
       if (voiceEnabled) {
-        speakGuidance(t.voiceCaptured, lang);
+        speakGuidance(t.voiceUploaded, lang);
       }
     }
   };
@@ -190,6 +185,9 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   // Trigger Final Analysis
   const handleConfirmAndAnalyze = () => {
     if (capturedFile && capturedPreview) {
+      if (voiceEnabled) {
+        speakGuidance(t.voiceAnalyzing, lang);
+      }
       setShowQualityModal(false);
       onImageSelected(capturedFile, capturedPreview, selectedCrop);
     }
@@ -246,7 +244,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
           </label>
           <button
             onClick={onToggleVoice}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition cursor-pointer ${
               voiceEnabled
                 ? 'bg-emerald-950/80 border-emerald-500/40 text-emerald-300'
                 : 'bg-slate-900 border-slate-800 text-slate-400'
@@ -328,7 +326,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
                   <div className="absolute -top-1 -right-1 w-5 h-5 border-t-4 border-r-4 border-emerald-400" />
                   <div className="absolute -bottom-1 -left-1 w-5 h-5 border-b-4 border-l-4 border-emerald-400" />
                   <div className="absolute -bottom-1 -right-1 w-5 h-5 border-b-4 border-r-4 border-emerald-400" />
-                  <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent absolute top-1/2 -translate-y-1/2 animate-scan-radar" />
+                  <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent top-1/2 -translate-y-1/2 animate-scan-radar absolute" />
                 </div>
               </div>
             </div>
@@ -354,16 +352,16 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
 
                   <div className="text-center space-y-1">
                     <h4 className="text-sm font-bold text-white font-['Outfit']">
-                      AI Multi-Stage Crop Health Analysis
+                      {t.multiStageAnalysis}
                     </h4>
                     <p className="text-xs text-emerald-400 font-semibold">
-                      {scanStepIndex === 0 && 'Stage 01/07 — Normalizing and preprocessing foliar image...'}
-                      {scanStepIndex === 1 && 'Stage 02/07 — Verifying crop identity and leaf boundaries...'}
-                      {scanStepIndex === 2 && 'Stage 03/07 — Examining foliar discoloration & symptom patterns...'}
-                      {scanStepIndex === 3 && 'Stage 04/07 — Matching neural embeddings with disease classes...'}
-                      {scanStepIndex === 4 && 'Stage 05/07 — Estimating lesion severity & affected foliar area %...'}
-                      {scanStepIndex === 5 && 'Stage 06/07 — Calculating agro-climatic disease risk & score...'}
-                      {scanStepIndex === 6 && 'Stage 07/07 — Formulating safe IPM recommendations & advisory...'}
+                      {scanStepIndex === 0 && t.stage1}
+                      {scanStepIndex === 1 && t.stage2}
+                      {scanStepIndex === 2 && t.stage3}
+                      {scanStepIndex === 3 && t.stage4}
+                      {scanStepIndex === 4 && t.stage5}
+                      {scanStepIndex === 5 && t.stage6}
+                      {scanStepIndex === 6 && t.stage7}
                     </p>
                   </div>
                 </div>
@@ -372,7 +370,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
               {!isAnalyzing && (
                 <div className="absolute top-3 left-3 bg-emerald-950/90 backdrop-blur border border-emerald-500/40 text-emerald-300 text-xs px-3 py-1 rounded-full flex items-center gap-1.5 font-semibold">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Image Staged</span>
+                  <span>{t.imageStaged}</span>
                 </div>
               )}
             </div>

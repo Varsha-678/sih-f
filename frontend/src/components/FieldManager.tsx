@@ -22,7 +22,7 @@ export const FieldManager: React.FC<FieldManagerProps> = ({
   lang,
   onStartScanForField
 }) => {
-  const t = translations[lang];
+  const t = translations[lang] || translations.en;
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [filterCrop, setFilterCrop] = useState<string>('all');

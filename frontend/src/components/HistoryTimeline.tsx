@@ -17,7 +17,7 @@ export const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
   onSelectScan,
   onCompareScan
 }) => {
-  const t = translations[lang];
+  const t = translations[lang] || translations.en;
 
   const [historyScans, setHistoryScans] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');

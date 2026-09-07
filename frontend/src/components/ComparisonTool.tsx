@@ -16,7 +16,7 @@ export const ComparisonTool: React.FC<ComparisonToolProps> = ({
   lang,
   currentResult
 }) => {
-  const t = translations[lang];
+  const t = translations[lang] || translations.en;
 
   // Default selection
   const [scanAId, setScanAId] = useState<string>(scans[1]?.prediction_id || scans[0]?.prediction_id || '');

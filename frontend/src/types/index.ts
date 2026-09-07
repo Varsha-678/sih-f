@@ -1,4 +1,4 @@
-export type Language = 'en' | 'ta' | 'mr' | 'hi';
+export type Language = 'en' | 'mr' | 'hi' | 'ta' | 'te' | 'kn' | 'gu';
 
 export type NavTab = 
   | 'home' 
@@ -320,11 +320,8 @@ export interface DistrictHotspot {
     trap_density_index: number;
     cluster_proximity_index: number;
   };
-  advisory: {
+  advisory: Partial<Record<Language, string>> & {
     en: string;
-    ta: string;
-    mr: string;
-    hi: string;
   };
 }
 

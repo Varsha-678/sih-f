@@ -21,14 +21,14 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
   const t = translations[lang] || translations.en;
 
   const supportedCropsList = [
-    { name: 'Tomato', diseases: 'Early Blight, Late Blight, Septoria', icon: '🍅' },
-    { name: 'Cotton', diseases: 'Bacterial Blight (Karpa), Bollworm, Cercospora', icon: '🌱' },
-    { name: 'Rice / Paddy', diseases: 'Bacterial Leaf Blight, Blast, Brown Spot', icon: '🌾' },
-    { name: 'Potato', diseases: 'Early Blight, Late Blight, Scab', icon: '🥔' },
-    { name: 'Soybean', diseases: 'Asian Rust (Tamba), Frogeye Leaf Spot', icon: '🫘' },
-    { name: 'Sugarcane', diseases: 'Red Rot (Kuhila), Wilt, Smut', icon: '🎋' },
-    { name: 'Onion', diseases: 'Purple Blotch, Stemphylium Blight', icon: '🧅' },
-    { name: 'Pomegranate', diseases: 'Bacterial Blight (Telya), Anthracnose', icon: '🍎' },
+    { name: t.cropTomato, diseases: 'Early Blight, Late Blight, Septoria', icon: '🍅' },
+    { name: t.cropCotton, diseases: 'Bacterial Blight, Bollworm, Cercospora', icon: '🌱' },
+    { name: t.cropRice, diseases: 'Bacterial Leaf Blight, Blast, Brown Spot', icon: '🌾' },
+    { name: t.cropPotato, diseases: 'Early Blight, Late Blight, Scab', icon: '🥔' },
+    { name: t.cropSoybean, diseases: 'Asian Rust, Frogeye Leaf Spot', icon: '🫘' },
+    { name: t.cropSugarcane, diseases: 'Red Rot, Wilt, Smut', icon: '🎋' },
+    { name: t.cropOnion, diseases: 'Purple Blotch, Stemphylium Blight', icon: '🧅' },
+    { name: t.cropPomegranate, diseases: 'Bacterial Blight, Anthracnose', icon: '🍎' },
   ];
 
   return (
@@ -44,17 +44,17 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
             {/* Top Badge */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs font-semibold shadow-inner">
               <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              <span>AgriTech + Computer Vision Intelligence • 94.2% Verified Accuracy</span>
+              <span>{t.heroBadge}</span>
             </div>
 
             {/* Main Headline */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight font-['Outfit']">
-              Detect Crop Diseases Before They Spread.
+              {t.heroHeadline}
             </h1>
 
             {/* Subheadline */}
             <p className="text-sm md:text-lg text-slate-300 max-w-xl leading-relaxed">
-              AI-powered crop health intelligence that helps identify early disease symptoms, assess risk, and support timely field decisions.
+              {t.heroSubheadline}
             </p>
 
             {/* Action CTAs */}
@@ -64,7 +64,7 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
                 className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-extrabold text-base shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2.5 transition-all transform active:scale-95 cursor-pointer"
               >
                 <Camera className="w-5 h-5" />
-                <span>Analyze a Crop</span>
+                <span>{t.btnAnalyzeCrop || t.primaryCta}</span>
                 <ArrowRight className="w-4 h-4 ml-1" />
               </button>
 
@@ -73,7 +73,7 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
                 className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-slate-200 font-semibold text-sm border border-slate-700/80 flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
                 <Activity className="w-4 h-4 text-emerald-400" />
-                <span>Explore Crop Health</span>
+                <span>{t.exploreCropHealth}</span>
               </button>
             </div>
 
@@ -91,10 +91,10 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
               <div className="flex items-center justify-between border-b border-slate-800 pb-2.5 text-xs">
                 <span className="font-bold text-emerald-400 flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  Computer Vision Active
+                  {t.cvActive}
                 </span>
                 <span className="font-mono text-slate-400 font-semibold">
-                  EfficientNet-B0 • Grad-CAM
+                  {t.cvModel}
                 </span>
               </div>
 
@@ -105,12 +105,12 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
                   <Leaf className="w-32 h-32 text-emerald-500/40" />
 
                   {/* Simulated Symptom Lesions */}
-                  <div className="absolute top-1/3 left-1/3 w-10 h-10 rounded-full border-2 border-amber-400/80 bg-amber-500/20 flex items-center justify-center animate-pulse">
-                    <span className="text-[9px] font-mono font-bold text-amber-300">Target</span>
+                  <div className="absolute top-1/3 left-1/3 w-12 h-12 rounded-full border-2 border-amber-400/80 bg-amber-500/20 flex items-center justify-center animate-pulse">
+                    <span className="text-[9px] font-mono font-bold text-amber-300">{t.targetSpot}</span>
                   </div>
 
-                  <div className="absolute bottom-1/3 right-1/4 w-8 h-8 rounded-full border-2 border-red-400/80 bg-red-500/20 flex items-center justify-center animate-pulse">
-                    <span className="text-[8px] font-mono font-bold text-red-300">Lesion</span>
+                  <div className="absolute bottom-1/3 right-1/4 w-10 h-10 rounded-full border-2 border-red-400/80 bg-red-500/20 flex items-center justify-center animate-pulse">
+                    <span className="text-[8px] font-mono font-bold text-red-300">{t.lesionSpot}</span>
                   </div>
 
                   {/* Dynamic Laser Scanning Line */}
@@ -120,25 +120,25 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
                 {/* AI HUD Overlay Badge */}
                 <div className="absolute top-3 left-3 bg-slate-950/90 backdrop-blur px-3 py-1 rounded-full border border-emerald-500/40 text-[11px] text-emerald-300 font-bold flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Early Blight (94.2% AI Estimate)</span>
+                  <span>{t.earlyBlightHud}</span>
                 </div>
 
                 <div className="absolute bottom-3 right-3 bg-slate-950/90 backdrop-blur px-3 py-1 rounded-full border border-slate-700 text-[11px] text-slate-300 font-mono font-bold">
-                  Affected: 18% • Score: 78/100
+                  {t.affectedHud}
                 </div>
               </div>
 
               {/* Core Flow Stepper Ribbon */}
-              <div className="p-2.5 bg-slate-900/80 rounded-xl border border-slate-800 text-[10px] text-slate-300 font-bold flex items-center justify-between text-center">
-                <span>📷 Photo</span>
-                <span className="text-emerald-400">→</span>
-                <span>🧠 AI Vision</span>
-                <span className="text-emerald-400">→</span>
-                <span>🔍 Detection</span>
-                <span className="text-emerald-400">→</span>
-                <span>📊 Score (78)</span>
-                <span className="text-emerald-400">→</span>
-                <span>⚠️ Warning</span>
+              <div className="p-2.5 bg-slate-900/80 rounded-xl border border-slate-800 text-[10px] text-slate-300 font-bold flex items-center justify-between text-center overflow-x-auto gap-1">
+                <span className="whitespace-nowrap">{t.stepPhoto}</span>
+                <span className="text-emerald-400 shrink-0">→</span>
+                <span className="whitespace-nowrap">{t.stepAIVision}</span>
+                <span className="text-emerald-400 shrink-0">→</span>
+                <span className="whitespace-nowrap">{t.stepDetection}</span>
+                <span className="text-emerald-400 shrink-0">→</span>
+                <span className="whitespace-nowrap">{t.stepScore}</span>
+                <span className="text-emerald-400 shrink-0">→</span>
+                <span className="whitespace-nowrap">{t.stepWarning}</span>
               </div>
             </div>
           </div>
@@ -149,13 +149,13 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
       <section className="space-y-8">
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-            End-to-End AgriTech Architecture
+            {t.lifecycleBadge}
           </span>
           <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight font-['Outfit']">
-            The Complete Crop Health Lifecycle
+            {t.lifecycleTitle}
           </h2>
           <p className="text-xs md:text-sm text-slate-400">
-            From single-leaf image capture to continuous farm-wide disease monitoring.
+            {t.lifecycleSubtitle}
           </p>
         </div>
 
@@ -164,9 +164,9 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
             <div className="w-12 h-12 rounded-xl bg-emerald-950/80 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
               <Camera className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-white">1. Capture & Quality Check</h3>
+            <h3 className="text-base font-bold text-white">{t.lcStep1Title}</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Camera or upload with pre-scan blur, brightness, and leaf coverage validation.
+              {t.lcStep1Desc}
             </p>
           </div>
 
@@ -174,9 +174,9 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
             <div className="w-12 h-12 rounded-xl bg-teal-950/80 border border-teal-500/40 flex items-center justify-center text-teal-400">
               <Sparkles className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-white">2. Neural Disease Screening</h3>
+            <h3 className="text-base font-bold text-white">{t.lcStep2Title}</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Calibrated multi-class classification with Grad-CAM visual attention heatmaps.
+              {t.lcStep2Desc}
             </p>
           </div>
 
@@ -184,9 +184,9 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
             <div className="w-12 h-12 rounded-xl bg-amber-950/80 border border-amber-500/40 flex items-center justify-center text-amber-400">
               <Activity className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-white">3. Severity & Health Score</h3>
+            <h3 className="text-base font-bold text-white">{t.lcStep3Title}</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Foliar affected area measurement and modular Crop Health Score (0-100).
+              {t.lcStep3Desc}
             </p>
           </div>
 
@@ -194,9 +194,9 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
             <div className="w-12 h-12 rounded-xl bg-sky-950/80 border border-sky-500/40 flex items-center justify-center text-sky-400">
               <MapPin className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-white">4. Risk Tracking & Advisory</h3>
+            <h3 className="text-base font-bold text-white">{t.lcStep4Title}</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Agro-climatic risk forecasting, safe IPM next steps, and historical scan comparison.
+              {t.lcStep4Desc}
             </p>
           </div>
         </div>
@@ -207,10 +207,10 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h3 className="text-xl font-bold text-white font-['Outfit']">
-              Supported Agricultural Crops & Major Pathogens
+              {t.supportedCropsTitle}
             </h3>
             <p className="text-xs text-slate-400">
-              Trained on validated field datasets with &gt;90% accuracy standards.
+              {t.supportedCropsSubtitle}
             </p>
           </div>
 
@@ -218,7 +218,7 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
             onClick={() => onNavigateTab('library')}
             className="text-xs text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 cursor-pointer"
           >
-            <span>Explore Full Disease Library</span>
+            <span>{t.exploreFullLibrary}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -252,10 +252,10 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
             <Activity className="w-5 h-5" />
           </div>
           <h3 className="text-lg font-bold text-white font-['Outfit']">
-            Crop Health Dashboard
+            {t.cardDashboardTitle}
           </h3>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Track foliar health trends, monitor active field plots, and view disease occurrence charts.
+            {t.cardDashboardDesc}
           </p>
         </div>
 
@@ -267,10 +267,10 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
             <AlertTriangle className="w-5 h-5" />
           </div>
           <h3 className="text-lg font-bold text-white font-['Outfit']">
-            Agro-Climatic Risk Monitor
+            {t.cardRiskTitle}
           </h3>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Real-time humidity, temperature, and spore incubation forecasts across regional crop clusters.
+            {t.cardRiskDesc}
           </p>
         </div>
 
@@ -282,10 +282,10 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
             <Award className="w-5 h-5" />
           </div>
           <h3 className="text-lg font-bold text-white font-['Outfit']">
-            Dataset & Model Quality Gate
+            {t.cardModelTitle}
           </h3>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Inspect model evaluation metrics (94.25% test accuracy), open dataset sources, and trust standards.
+            {t.cardModelDesc}
           </p>
         </div>
       </section>

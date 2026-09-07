@@ -4,9 +4,11 @@ import {
   Layers, FileText, Info, TrendingUp,
   GitCompare, UserCheck, HelpCircle, ShieldAlert, ArrowLeft,
   Sparkles, Eye, ThumbsUp, ThumbsDown, HelpCircle as HelpIcon,
-  AlertTriangle
+  AlertTriangle, Volume2
 } from 'lucide-react';
 import type { DiagnosticResult as DiagnosticResultType, Language } from '../types';
+import { translations } from '../utils/translations';
+import { speakGuidance } from '../utils/clientDiagnosis';
 
 interface DiagnosticResultProps {
   result: DiagnosticResultType;
@@ -20,12 +22,14 @@ interface DiagnosticResultProps {
 
 export const DiagnosticResult: React.FC<DiagnosticResultProps> = ({
   result,
+  lang,
   onReset,
   onOpenSymptomAssistant,
   onOpenExpertReview,
   onOpenComparison,
   onOpenSpreadTimeline
 }) => {
+  const t = translations[lang] || translations.en;
   const [viewMode, setViewMode] = useState<'farmer' | 'expert'>('farmer');
   const [activeVisualTab, setActiveVisualTab] = useState<'original' | 'detection' | 'segmentation' | 'affected'>('detection');
   const [feedbackGiven, setFeedbackGiven] = useState<'useful' | 'not_sure' | 'incorrect' | null>(null);
@@ -145,17 +149,30 @@ export const DiagnosticResult: React.FC<DiagnosticResultProps> = ({
 
             <div className="space-y-0.5">
               <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider block">
-                {isHealthy ? 'AI Foliar Assessment' : 'Possible Condition Detected (AI Estimate)'}
+                {isHealthy ? (lang === 'ta' ? 'AI இலை நலம் மதிப்பீடு' : lang === 'te' ? 'AI ఆకు ఆరోగ్య అంచనా' : lang === 'kn' ? 'AI ಎಲೆ ಆರೋಗ್ಯ ಮೌಲ್ಯಮಾಪನ' : lang === 'gu' ? 'AI પાન સ્વાસ્થ્ય આકલન' : lang === 'mr' ? 'AI पान आरोग्य तपासणी' : lang === 'hi' ? 'AI पत्ती स्वास्थ्य आकलन' : 'AI Foliar Assessment') : (lang === 'ta' ? 'கண்டறியப்பட்ட சாத்தியமான நிலை' : lang === 'te' ? 'గుర్తించబడిన సంభావ్య పరిస్థితి' : lang === 'kn' ? 'ಪತ್ತೆಯಾದ ಸಂಭವನೀಯ ಸ್ಥಿತಿ' : lang === 'gu' ? 'જોવા મળેલ સંભવિત રોગ' : lang === 'mr' ? 'आढळलेला संभाव्य रोग' : lang === 'hi' ? 'पहचाना गया संभावित रोग' : 'Possible Condition Detected (AI Estimate)')}
               </span>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight font-['Outfit']">
-                {result.crop} • {result.condition}
-              </h2>
+              <div className="flex flex-wrap items-center gap-3">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight font-['Outfit']">
+                  {result.crop} • {result.condition}
+                </h2>
+                <button
+                  onClick={() => {
+                    const speech = `${result.crop}. ${result.condition}. ${t.confidence}: ${(result.confidence * 100).toFixed(0)}%. ${result.advisory?.what_to_do_now || result.advisory?.symptoms || ''}`;
+                    speakGuidance(speech, lang);
+                  }}
+                  title="Listen in Native Voice"
+                  className="px-3 py-1.5 rounded-xl bg-emerald-950/90 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-sm"
+                >
+                  <Volume2 className="w-4 h-4 text-emerald-400 animate-pulse" />
+                  <span>{lang === 'ta' ? 'குரலில் கேளுங்கள்' : lang === 'te' ? 'వాయిస్‌లో వినండి' : lang === 'kn' ? 'ಧ್ವನಿಯಲ್ಲಿ ಕೇಳಿ' : lang === 'gu' ? 'ઓડિયો સાંભળો' : lang === 'mr' ? 'आवाजात ऐका' : lang === 'hi' ? 'आवाज में सुनें' : 'Listen'}</span>
+                </button>
+              </div>
             </div>
 
             {result.scientific_name && (
               <p className="text-xs md:text-sm text-slate-400 italic flex items-center gap-1.5">
                 <Info className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>Pathogen: <strong>{result.scientific_name}</strong></span>
+                <span>{t.scientificName}: <strong>{result.scientific_name}</strong></span>
               </p>
             )}
           </div>
@@ -165,20 +182,20 @@ export const DiagnosticResult: React.FC<DiagnosticResultProps> = ({
             {/* Calibrated Confidence */}
             <div className="bg-slate-950/90 p-4 rounded-2xl border border-slate-800 text-right space-y-0.5">
               <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold block">
-                AI Confidence
+                {t.confidence}
               </span>
               <div className="text-2xl md:text-3xl font-black gradient-text">
                 {(result.confidence * 100).toFixed(1)}%
               </div>
               <span className="text-[10px] text-slate-500 block">
-                Calibrated AI estimate
+                {t.confidence}
               </span>
             </div>
 
             {/* Overall Crop Health Score */}
             <div className="bg-slate-950/90 p-4 rounded-2xl border border-emerald-500/40 text-right space-y-0.5">
               <span className="text-[10px] text-emerald-400 uppercase tracking-wider font-bold block">
-                Crop Health Score
+                {t.healthStatus}
               </span>
               <div className="text-2xl md:text-3xl font-black text-white font-['Outfit']">
                 {healthScore.overall_score}<span className="text-xs text-slate-400">/100</span>

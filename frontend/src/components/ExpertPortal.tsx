@@ -15,7 +15,7 @@ export const ExpertPortal: React.FC<ExpertPortalProps> = ({
   lang,
   initialReviewData
 }) => {
-  const t = translations[lang];
+  const t = translations[lang] || translations.en;
 
   const [activeSubTab, setActiveSubTab] = useState<'request' | 'queue' | 'metrics'>('request');
   const [metrics, setMetrics] = useState<MLMetricsData | null>(null);

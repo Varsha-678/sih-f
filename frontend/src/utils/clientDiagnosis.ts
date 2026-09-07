@@ -9,38 +9,17 @@ interface CropConditionProfile {
   scientific_name: string;
   status: 'Healthy' | 'Early Signs' | 'Moderate' | 'Severe' | 'Diseased';
   base_severity: number;
-  advisory: {
+  advisory: Partial<Record<Language, {
+    symptoms: string;
+    what_it_means: string;
+    what_to_do_now: string;
+    prevention_guidance: string;
+    when_to_seek_expert: string;
+    organic: string;
+    chemical: string;
+    cultural: string;
+  }>> & {
     en: {
-      symptoms: string;
-      what_it_means: string;
-      what_to_do_now: string;
-      prevention_guidance: string;
-      when_to_seek_expert: string;
-      organic: string;
-      chemical: string;
-      cultural: string;
-    };
-    ta: {
-      symptoms: string;
-      what_it_means: string;
-      what_to_do_now: string;
-      prevention_guidance: string;
-      when_to_seek_expert: string;
-      organic: string;
-      chemical: string;
-      cultural: string;
-    };
-    mr: {
-      symptoms: string;
-      what_it_means: string;
-      what_to_do_now: string;
-      prevention_guidance: string;
-      when_to_seek_expert: string;
-      organic: string;
-      chemical: string;
-      cultural: string;
-    };
-    hi: {
       symptoms: string;
       what_it_means: string;
       what_to_do_now: string;
@@ -359,13 +338,28 @@ export function speakGuidance(text: string, lang: Language = 'en') {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     const langCodes: Record<Language, string> = {
-      en: 'en-US',
-      ta: 'ta-IN',
+      en: 'en-IN',
       mr: 'mr-IN',
       hi: 'hi-IN',
+      ta: 'ta-IN',
+      te: 'te-IN',
+      kn: 'kn-IN',
+      gu: 'gu-IN',
     };
-    utterance.lang = langCodes[lang] || 'en-US';
-    utterance.rate = 0.95;
+    const targetLang = langCodes[lang] || 'en-IN';
+    utterance.lang = targetLang;
+    utterance.rate = 0.92;
+
+    // Pick best matching native browser voice if available
+    const voices = window.speechSynthesis.getVoices();
+    if (voices && voices.length > 0) {
+      const prefix = targetLang.split('-')[0].toLowerCase();
+      const matched = voices.find((v) => v.lang.toLowerCase().replace('_', '-').startsWith(prefix));
+      if (matched) {
+        utterance.voice = matched;
+      }
+    }
+
     window.speechSynthesis.speak(utterance);
   } catch (err) {
     console.warn('Speech synthesis not supported or failed:', err);
@@ -747,8 +741,7 @@ export async function diagnoseImageClientSide(
   const confidenceScore = isHealthy ? 0.95 : 0.92;
   const heatmapUrl = await generateAttentionHeatmapUrl(file, affectedPercentage, isHealthy);
 
-  const langKey = (['en', 'ta', 'mr', 'hi'].includes(lang) ? lang : 'en') as 'en' | 'ta' | 'mr' | 'hi';
-  const advText = profile.advisory[langKey] || profile.advisory.en;
+  const advText = profile.advisory[lang] || profile.advisory.en;
 
   const top3 = [
     {
