@@ -2,19 +2,22 @@ import React from 'react';
 import { 
   Sparkles, Camera, Activity, MapPin, 
   ArrowRight, ShieldCheck,
-  Award, CheckCircle2, AlertTriangle, Leaf
+  Award, CheckCircle2, AlertTriangle, Leaf,
+  Globe
 } from 'lucide-react';
 import type { Language, NavTab } from '../types';
 import { translations } from '../utils/translations';
 
 interface LandingHomeProps {
   lang: Language;
+  onLanguageChange: (newLang: Language) => void;
   onStartScan: () => void;
   onNavigateTab: (tab: NavTab) => void;
 }
 
 export const LandingHome: React.FC<LandingHomeProps> = ({
   lang,
+  onLanguageChange,
   onStartScan,
   onNavigateTab
 }) => {
@@ -32,7 +35,47 @@ export const LandingHome: React.FC<LandingHomeProps> = ({
   ];
 
   return (
-    <div className="space-y-16 pb-16 animate-fadeIn">
+    <div className="space-y-8 md:space-y-12 pb-16 animate-fadeIn">
+      {/* 0. Prominent Quick Language Selection Banner */}
+      <div className="glass-panel p-3 sm:p-4 rounded-2xl border border-emerald-500/40 bg-gradient-to-r from-slate-950 via-slate-900 to-emerald-950/40 flex flex-col md:flex-row items-center justify-between gap-3 shadow-xl">
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
+          <div className="w-7 h-7 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+            <Globe className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="text-emerald-400 font-bold block sm:inline">Choose Language / </span>
+            <span className="text-white">மொழியைத் தேர்ந்தெடுக்கவும் / भाषा चुनें / భాష:</span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-center gap-1.5 w-full md:w-auto">
+          {[
+            { code: 'ta', label: 'தமிழ்', sub: 'Tamil' },
+            { code: 'te', label: 'తెలుగు', sub: 'Telugu' },
+            { code: 'kn', label: 'ಕನ್ನಡ', sub: 'Kannada' },
+            { code: 'gu', label: 'ગુજરાતી', sub: 'Gujarati' },
+            { code: 'mr', label: 'मराठी', sub: 'Marathi' },
+            { code: 'hi', label: 'हिंदी', sub: 'Hindi' },
+            { code: 'en', label: 'English', sub: 'EN' },
+          ].map((item) => (
+            <button
+              key={item.code}
+              onClick={() => onLanguageChange(item.code as Language)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                lang === item.code
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/30 font-black scale-105 ring-2 ring-emerald-400'
+                  : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700/80'
+              }`}
+            >
+              <span>{item.label}</span>
+              <span className={`text-[10px] ${lang === item.code ? 'text-slate-950/70 font-mono' : 'text-slate-500'}`}>
+                ({item.sub})
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* 1. Hero Section */}
       <section className="relative overflow-hidden rounded-3xl glass-panel-glow border border-emerald-500/30 p-6 md:p-12">
         <div className="absolute -top-24 -left-24 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />

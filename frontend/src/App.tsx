@@ -28,7 +28,23 @@ import { diagnoseImageClientSide } from './utils/clientDiagnosis';
 import { ShieldCheck, PhoneCall, Sparkles } from 'lucide-react';
 
 export function App() {
-  const [lang, setLang] = useState<Language>('en');
+  const [lang, setLang] = useState<Language>(() => {
+    try {
+      const saved = localStorage.getItem('agri_lang') as Language;
+      if (saved && ['en', 'mr', 'hi', 'ta', 'te', 'kn', 'gu'].includes(saved)) {
+        return saved;
+      }
+    } catch (e) {}
+    return 'en';
+  });
+
+  const handleLanguageChange = (newLang: Language) => {
+    setLang(newLang);
+    try {
+      localStorage.setItem('agri_lang', newLang);
+    } catch (e) {}
+  };
+
   const [activeTab, setActiveTab] = useState<NavTab>('home');
   const [diagnosticResult, setDiagnosticResult] = useState<DiagnosticResultType | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
@@ -300,7 +316,7 @@ export function App() {
       <div className="relative z-20">
         <Navbar
           lang={lang}
-          onLanguageChange={setLang}
+          onLanguageChange={handleLanguageChange}
           activeTab={activeTab}
           onTabChange={setActiveTab}
           notifications={notifications}
@@ -315,6 +331,7 @@ export function App() {
         {activeTab === 'home' && (
           <LandingHome
             lang={lang}
+            onLanguageChange={handleLanguageChange}
             onStartScan={() => {
               setDiagnosticResult(null);
               setActiveTab('detect');
