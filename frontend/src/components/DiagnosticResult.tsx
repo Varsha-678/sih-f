@@ -328,16 +328,16 @@ export const DiagnosticResult: React.FC<DiagnosticResultProps> = ({
           <div className="p-3.5 bg-slate-900/80 rounded-2xl border border-slate-800 space-y-2 text-xs">
             <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Why did the AI flag this? (Explainable Factors)</span>
+              <span>{t.whyDetectedTitle || (lang === 'ta' ? 'இது ஏன் கண்டறியப்பட்டது?' : 'Why did the AI flag this? (Explainable Factors)')}</span>
             </div>
             <p className="text-slate-300 leading-relaxed">
-              {result.explanation || 'AI detected foliar discoloration patterns and necrotic lesion margins concentrated in the highlighted attention zones.'}
+              {result.explanation || (lang === 'ta' ? 'ஹைலைட் செய்யப்பட்ட இலை பகுதிகளில் உள்ள அறிகுறிகள் மற்றும் வடிவங்களின் அடிப்படையில் AI இந்த முடிவை எடுத்துள்ளது.' : 'AI detected foliar discoloration patterns and necrotic lesion margins concentrated in the highlighted attention zones.')}
             </p>
             <div className="grid grid-cols-2 gap-2 pt-1 text-[11px] text-slate-400">
-              <span>• Leaf Discoloration: Chlorotic halos</span>
-              <span>• Spot Distribution: Concentric/Angular</span>
-              <span>• Edge Status: Necrotic tissue margins</span>
-              <span>• Texture: Raised foliar pustules</span>
+              <span>• {lang === 'ta' ? 'இலை நிறமாற்றம்: மஞ்சள் வளையங்கள்' : 'Leaf Discoloration: Chlorotic halos'}</span>
+              <span>• {lang === 'ta' ? 'புள்ளிகள் விநியோகம்: மைய புள்ளிகள்' : 'Spot Distribution: Concentric/Angular'}</span>
+              <span>• {lang === 'ta' ? 'விளிம்பு நிலை: திசு கருகல்' : 'Edge Status: Necrotic tissue margins'}</span>
+              <span>• {lang === 'ta' ? 'மேற்பரப்பு: உயர்த்தப்பட்ட புள்ளிகள்' : 'Texture: Raised foliar pustules'}</span>
             </div>
           </div>
         </div>
@@ -349,16 +349,16 @@ export const DiagnosticResult: React.FC<DiagnosticResultProps> = ({
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-white flex items-center gap-2 font-['Outfit']">
                 <Activity className="w-4 h-4 text-emerald-400" />
-                <span>Severity Scale & Affected Area</span>
+                <span>{t.severityMeterTitle || (lang === 'ta' ? 'நோய் தீவிரத்தன்மை மீட்டர்' : 'Severity Scale & Affected Area')}</span>
               </h3>
               <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${statusBadge.bg}`}>
-                Severity: {result.severity?.severity_category || 'Moderate'}
+                {t.severityLevel || 'Severity'}: {result.severity?.severity_category || 'Moderate'}
               </span>
             </div>
 
             <div className="space-y-2">
               <div className="flex justify-between text-xs font-semibold">
-                <span className="text-slate-400">Estimated Affected Foliar Area:</span>
+                <span className="text-slate-400">{t.affectedArea || 'Estimated Affected Foliar Area'}:</span>
                 <span className="text-white font-bold text-sm">
                   {result.severity?.affected_percentage || 0}%
                 </span>
@@ -373,17 +373,17 @@ export const DiagnosticResult: React.FC<DiagnosticResultProps> = ({
                 />
               </div>
               <div className="flex justify-between text-[10px] text-slate-500 font-medium">
-                <span>Healthy (0%)</span>
-                <span>Early (1-20%)</span>
-                <span>Moderate (21-50%)</span>
-                <span>Severe (51%+)</span>
+                <span>{t.statusHealthy || 'Healthy'} (0%)</span>
+                <span>{t.statusEarly || 'Early'} (1-20%)</span>
+                <span>{t.statusModerate || 'Moderate'} (21-50%)</span>
+                <span>{t.statusSevere || 'Severe'} (51%+)</span>
               </div>
             </div>
 
             <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-xs text-slate-200 flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
               <span>
-                <strong>Next Step:</strong> {result.severity?.action_urgency || 'Monitor foliar symptom progression every 3 days.'}
+                <strong>{t.severityActionUrgency || 'Next Step'}:</strong> {result.severity?.action_urgency || (lang === 'ta' ? 'ஒவ்வொரு 3 நாட்களுக்கும் இலை அறிகுறிகளை தொடர்ந்து கண்காணிக்கவும்.' : 'Monitor foliar symptom progression every 3 days.')}
               </span>
             </div>
           </div>
@@ -393,7 +393,7 @@ export const DiagnosticResult: React.FC<DiagnosticResultProps> = ({
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-white flex items-center gap-2 font-['Outfit']">
                 <AlertTriangle className="w-4 h-4 text-amber-400" />
-                <span>Early Disease Warning</span>
+                <span>{lang === 'ta' ? 'ஆரம்பகால நோய் எச்சரிக்கை' : 'Early Disease Warning'}</span>
               </h3>
               <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-500/40">
                 {earlyWarning.risk_level} ({earlyWarning.risk_score}/100)
@@ -401,12 +401,18 @@ export const DiagnosticResult: React.FC<DiagnosticResultProps> = ({
             </div>
 
             <p className="text-xs text-slate-300 leading-relaxed">
-              {earlyWarning.explanation}
+              {lang === 'ta' 
+                ? `AI நோயின் அறிகுறிகளை மதிப்பிட்டுள்ளது. இலை பாதிப்பு 25% ஐ தாண்டுவதற்கு முன் உடனடியாக நடவடிக்கை எடுக்க பரிந்துரைக்கப்படுகிறது.`
+                : earlyWarning.explanation}
             </p>
 
             <div className="space-y-1 text-[11px] text-slate-300">
-              <span className="font-bold text-amber-400 block">Why is this risk level assigned?</span>
-              {earlyWarning.triggers.map((trig, i) => (
+              <span className="font-bold text-amber-400 block">{lang === 'ta' ? 'இந்த ஆபத்து நிலை ஏன் ஒதுக்கப்பட்டது?' : 'Why is this risk level assigned?'}</span>
+              {(lang === 'ta' ? [
+                'கணினி பார்வை மூலம் இலையில் காயங்கள் / புள்ளிகள் கண்டறியப்பட்டன',
+                '80% க்கும் அதிகமான ஈரப்பதம் நோய் பரவலுக்கு சாதகமாக உள்ளது',
+                'இலைகளின் அடர்த்தி நோய் வளர ஏதுவாக உள்ளது'
+              ] : earlyWarning.triggers).map((trig, i) => (
                 <div key={i} className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                   <span>{trig}</span>
@@ -419,7 +425,7 @@ export const DiagnosticResult: React.FC<DiagnosticResultProps> = ({
           {viewMode === 'expert' && (
             <div className="glass-panel rounded-3xl p-5 space-y-3 border border-slate-800">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                Crop Health Score Breakdown (Modular Architecture)
+                {lang === 'ta' ? 'பயிர் நலம் மதிப்பெண் விபரம்' : 'Crop Health Score Breakdown'}
               </span>
 
               <div className="space-y-2 text-xs">
@@ -455,7 +461,7 @@ export const DiagnosticResult: React.FC<DiagnosticResultProps> = ({
                 className="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-slate-200 flex items-center justify-center gap-1.5 transition cursor-pointer"
               >
                 <GitCompare className="w-4 h-4 text-emerald-400" />
-                <span>Compare Scans</span>
+                <span>{t.tabCompare || (lang === 'ta' ? 'ஸ்கேன் ஒப்பீடு' : 'Compare Scans')}</span>
               </button>
             )}
 
@@ -465,7 +471,7 @@ export const DiagnosticResult: React.FC<DiagnosticResultProps> = ({
                 className="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-slate-200 flex items-center justify-center gap-1.5 transition cursor-pointer"
               >
                 <TrendingUp className="w-4 h-4 text-teal-400" />
-                <span>Spread Timeline</span>
+                <span>{t.tabSpread || (lang === 'ta' ? 'பரவல் காலக்கோடு' : 'Spread Timeline')}</span>
               </button>
             )}
           </div>
@@ -478,10 +484,12 @@ export const DiagnosticResult: React.FC<DiagnosticResultProps> = ({
           <div>
             <h3 className="text-lg font-bold text-white flex items-center gap-2 font-['Outfit']">
               <FileText className="w-5 h-5 text-emerald-400" />
-              <span>Recommended Next Actions & Safe IPM Guidance</span>
+              <span>{t.guidanceTitle || (lang === 'ta' ? 'செயல்படக்கூடிய தடுப்பு மற்றும் பராமரிப்பு வழிகாட்டுதல்' : 'Recommended Next Actions & Safe IPM Guidance')}</span>
             </h3>
             <p className="text-xs text-slate-400">
-              Practical, verified agricultural management steps. Always consult local extension services.
+              {lang === 'ta' 
+                ? 'செயல்முறை, சரிபார்க்கப்பட்ட விவசாய மேலாண்மை படிகள். எப்போதும் உள்ளூர் விவசாய அதிகாரிகளை அணுகவும்.'
+                : 'Practical, verified agricultural management steps. Always consult local extension services.'}
             </p>
           </div>
 
@@ -490,7 +498,7 @@ export const DiagnosticResult: React.FC<DiagnosticResultProps> = ({
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold shadow-md shadow-emerald-500/20"
           >
             <PhoneCall className="w-3.5 h-3.5" />
-            <span>Kisan Helpline</span>
+            <span>{t.helplineBtn || (lang === 'ta' ? 'கிசான் உதவி எண் (1800-180-1551)' : 'Kisan Helpline')}</span>
           </a>
         </div>
 
@@ -498,46 +506,70 @@ export const DiagnosticResult: React.FC<DiagnosticResultProps> = ({
           {/* Symptoms */}
           <div className="p-4 bg-slate-900/80 rounded-2xl border border-slate-800 space-y-1.5">
             <span className="text-emerald-400 font-bold uppercase tracking-wider text-[11px] block">
-              Observed Symptoms:
+              {t.whatDetected || (lang === 'ta' ? 'கண்டறியப்பட்ட அறிகுறிகள்:' : 'OBSERVED SYMPTOMS:')}
             </span>
             <p className="text-slate-300 leading-relaxed">
-              {result.advisory?.symptoms}
+              {lang === 'ta' 
+                ? ((result.advisory?.symptoms && /[\u0B80-\u0BFF]/.test(result.advisory.symptoms)) 
+                    ? result.advisory.symptoms 
+                    : (result.status === 'Healthy' || result.condition.toLowerCase().includes('healthy'))
+                      ? 'இலை ஆரோக்கியமாக உள்ளது, இயற்கையான பச்சை நிறமும் நல்ல வளர்ச்சியும் காணப்படுகிறது. நோய் அறிகுறிகள் அல்லது புள்ளிகள் ஏதும் இல்லை.'
+                      : 'இலை ஓரங்களில் நீர் வடிந்த புள்ளிகள், மஞ்சள் நிறமாற்றம் அல்லது கருகல் அறிகுறிகள் கண்டறியப்பட்டுள்ளன.')
+                : (result.advisory?.symptoms || 'Foliar discoloration and lesion symptoms observed.')}
             </p>
           </div>
 
           {/* Immediate Action */}
           <div className="p-4 bg-slate-900/80 rounded-2xl border border-slate-800 space-y-1.5">
             <span className="text-amber-400 font-bold uppercase tracking-wider text-[11px] block">
-              What to Do Now:
+              {t.whatToDoNow || (lang === 'ta' ? 'இப்போது என்ன செய்ய வேண்டும்:' : 'WHAT TO DO NOW:')}
             </span>
             <p className="text-slate-300 leading-relaxed">
-              {result.advisory?.what_to_do_now || result.advisory?.chemical_ipm}
+              {lang === 'ta'
+                ? ((result.advisory?.what_to_do_now && /[\u0B80-\u0BFF]/.test(result.advisory.what_to_do_now))
+                    ? result.advisory.what_to_do_now
+                    : (result.status === 'Healthy' || result.condition.toLowerCase().includes('healthy'))
+                      ? 'ரசாயன தெளிப்பு தேவையில்லை. வழக்கமான நீர் பாசனம் மற்றும் சீரான சத்து மேலாண்மையைத் தொடரவும்.'
+                      : '5% வேப்பம்பருப்பு சாறு (NSKE) அல்லது சூடோமோனாஸ் ஃபுளோரசன்ஸ் 10 கிராம்/லிட்டர் தெளிக்கவும்.')
+                : (result.advisory?.what_to_do_now || result.advisory?.chemical_ipm || 'Apply targeted organic bio-fungicide or recommend IPM measures.')}
             </p>
           </div>
 
           {/* Organic / Cultural Prevention */}
           <div className="p-4 bg-slate-900/80 rounded-2xl border border-slate-800 space-y-1.5">
             <span className="text-teal-400 font-bold uppercase tracking-wider text-[11px] block">
-              Cultural & Organic Practices:
+              {t.preventSpread || (lang === 'ta' ? 'மேலும் பரவுவதை எவ்வாறு தடுப்பது:' : 'CULTURAL & ORGANIC PRACTICES:')}
             </span>
             <p className="text-slate-300 leading-relaxed">
-              {result.advisory?.organic_remedies || result.advisory?.cultural_practices}
+              {lang === 'ta'
+                ? ((result.advisory?.organic_remedies && /[\u0B80-\u0BFF]/.test(result.advisory.organic_remedies))
+                    ? result.advisory.organic_remedies
+                    : (result.status === 'Healthy' || result.condition.toLowerCase().includes('healthy'))
+                      ? 'பயிரின் நோய் எதிர்ப்பு திறனைப் பராமரிக்க ஜீவாமிர்தம் அல்லது கடற்பாசி சாறு (2 மி.லி/லி) தெளிக்கவும்.'
+                      : 'அதிகப்படியான உரங்களைத் தவிர்க்கவும். வயலில் சரியான நீர் வடிகால் பராமரித்து நோய் பரவலைத் தடுக்கவும்.')
+                : (result.advisory?.organic_remedies || result.advisory?.cultural_practices || 'Maintain optimal irrigation and weed-free field borders.')}
             </p>
           </div>
 
           {/* When to Seek Expert Help */}
           <div className="p-4 bg-slate-900/80 rounded-2xl border border-slate-800 space-y-1.5">
             <span className="text-sky-400 font-bold uppercase tracking-wider text-[11px] block">
-              When to Consult Agronomist:
+              {t.whenSeekExpert || (lang === 'ta' ? 'விவசாய நிபுணரை எப்போது அணுக வேண்டும்:' : 'WHEN TO CONSULT AGRONOMIST:')}
             </span>
             <p className="text-slate-300 leading-relaxed">
-              {result.advisory?.when_to_seek_expert || 'If lesions spread to middle and upper leaves within 4-5 days.'}
+              {lang === 'ta'
+                ? ((result.advisory?.when_to_seek_expert && /[\u0B80-\u0BFF]/.test(result.advisory.when_to_seek_expert))
+                    ? result.advisory.when_to_seek_expert
+                    : 'அறிகுறிகள் 4-5 நாட்களில் அடுத்தடுத்த இலைகளுக்கு பரவினால் விவசாய அதிகாரியை அணுகவும்.')
+                : (result.advisory?.when_to_seek_expert || 'If lesions spread to middle and upper leaves within 4-5 days.')}
             </p>
           </div>
         </div>
 
         <p className="text-[11px] text-slate-400 italic text-center pt-2">
-          AI guidance is informational. Confirm the condition and treatment approach with a qualified agricultural professional.
+          {lang === 'ta'
+            ? 'AI ஆலோசனைகள் தகவல் நோக்கத்திற்காக மட்டுமே. தகுதியான விவசாய நிபுணரிடம் உறுதிப்படுத்திக் கொள்ளவும்.'
+            : 'AI guidance is informational. Confirm the condition and treatment approach with a qualified agricultural professional.'}
         </p>
       </div>
 

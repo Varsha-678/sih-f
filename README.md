@@ -1,4 +1,4 @@
-# 🌾 AgriRakshak (ॲग्रीरक्षक) — Crop Health & Early Warning Intelligence
+# 🌾 AgriRakshak () — Crop Health & Early Warning Intelligence
 ### Smart India Hackathon 2026 • Problem Statement: SIH26131 (Government of Maharashtra)
 > **Tagline:** *Detect Early. Protect Every Harvest.*  
 > **Category:** Software | **Theme:** Agriculture, FoodTech & Rural Development

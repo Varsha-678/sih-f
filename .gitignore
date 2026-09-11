@@ -23,3 +23,9 @@ backend/*.db
 .DS_Store
 Thumbs.db
 *.log
+
+# Generated Uploads & Scans
+uploads/
+backend/static/scans/*.jpg
+backend/static/heatmaps/*.jpg
+

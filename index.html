@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>AgriRakshak - Crop Disease Detection</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f8f1;
+            color: #1f3b24;
+        }
+
+        .navbar {
+            background: #1f6b3a;
+            color: white;
+            padding: 18px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .tagline {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            margin-bottom: 12px;
+            color: #195c32;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: #607066;
+        }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            border: 2px dashed #5a9e6f;
+            border-radius: 15px;
+            padding: 45px 20px;
+            text-align: center;
+            background: #f8fcf6;
+        }
+
+        .upload-icon {
+            font-size: 55px;
+            margin-bottom: 15px;
+        }
+
+        .upload-area h2 {
+            margin-bottom: 10px;
+        }
+
+        .upload-area p {
+            color: #6c7a70;
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-label {
+            display: inline-block;
+            background: #e7f3e9;
+            color: #216b3b;
+            padding: 13px 22px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .file-name {
+            margin-top: 15px;
+            color: #555;
+        }
+
+        .predict-btn {
+            margin-top: 25px;
+            background: #1f7a42;
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .predict-btn:hover {
+            background: #155c31;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .result-image {
+            width: 100%;
+            border-radius: 15px;
+            border: 1px solid #ddd;
+        }
+
+        .result-title {
+            font-size: 26px;
+            margin-bottom: 20px;
+        }
+
+        .prediction-box {
+            background: #f5faf4;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 15px;
+        }
+
+        .prediction-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .confidence {
+            font-size: 16px;
+            color: #526158;
+        }
+
+        .risk {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 9px 16px;
+            border-radius: 20px;
+            background: #fff1cc;
+            font-weight: bold;
+        }
+
+        .info {
+            margin-top: 25px;
+            padding: 18px;
+            background: #eef7ed;
+            border-radius: 12px;
+            line-height: 1.6;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #718076;
+            font-size: 14px;
+        }
+
+        @media(max-width: 750px) {
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .navbar {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- NAVBAR -->
+
+<div class="navbar">
+
+    <div class="logo">
+        🌾 AgriRakshak
+    </div>
+
+    <div class="tagline">
+        AI-Powered Early Crop Health Detection
+    </div>
+
+</div>
+
+
+<!-- MAIN -->
+
+<div class="container">
+
+
+    <!-- HERO -->
+
+    <div class="hero">
+
+        <h1>
+            Crop Disease Detection
+        </h1>
+
+        <p>
+            Upload a crop image and let AgriRakshak analyze it using AI.
+        </p>
+
+    </div>
+
+
+    <!-- UPLOAD CARD -->
+
+    <div class="card">
+
+        <form action="/predict"
+              method="POST"
+              enctype="multipart/form-data">
+
+            <div class="upload-area">
+
+                <div class="upload-icon">
+                    📷
+                </div>
+
+                <h2>
+                    Upload Crop Image
+                </h2>
+
+                <p>
+                    Upload a clear image of a rice or maize leaf/crop.
+                </p>
+
+                <label for="image"
+                       class="file-label">
+
+                    Choose Image
+
+                </label>
+
+                <input
+                    type="file"
+                    id="image"
+                    name="image"
+                    accept="image/png,image/jpeg,image/webp"
+                    required
+                >
+
+                <div class="file-name"
+                     id="fileName">
+
+                    No image selected
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="predict-btn">
+
+                    🔍 Analyze Crop
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- RESULTS -->
+
+    {% if image_url %}
+
+    <div class="card">
+
+        <div class="result-grid">
+
+
+            <!-- IMAGE -->
+
+            <div>
+
+                <h2 class="result-title">
+                    Analysis Image
+                </h2>
+
+                <img
+                    src="{{ image_url }}"
+                    class="result-image"
+                    alt="Prediction result">
+
+            </div>
+
+
+            <!-- RESULT -->
+
+            <div>
+
+                <h2 class="result-title">
+                    AI Prediction
+                </h2>
+
+
+                {% if predictions %}
+
+                    {% for prediction in predictions %}
+
+                    <div class="prediction-box">
+
+                        <div class="prediction-name">
+
+                            🌱 {{ prediction.class }}
+
+                        </div>
+
+                        <div class="confidence">
+
+                            Confidence:
+                            <strong>
+                                {{ prediction.confidence }}%
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="prediction-box">
+
+                        <div class="prediction-name">
+
+                            🌿 No disease/pest detected
+
+                        </div>
+
+                        <div class="confidence">
+
+                            Try another clear crop image.
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+
+                <div class="risk">
+
+                    Risk Level:
+                    {{ risk }}
+
+                </div>
+
+
+                <div class="info">
+
+                    <strong>
+                        AgriRakshak Recommendation
+                    </strong>
+
+                    <br><br>
+
+                    This is an AI-based preliminary
+                    detection. For uncertain or severe
+                    cases, consult an agricultural expert
+                    or extension officer before taking
+                    treatment decisions.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+
+</div>
+
+
+<div class="footer">
+
+    AgriRakshak © 2026 |
+    AI-based Crop Health Monitoring
+
+</div>
+
+
+<script>
+
+    const imageInput =
+        document.getElementById("image");
+
+    const fileName =
+        document.getElementById("fileName");
+
+
+    imageInput.addEventListener(
+        "change",
+        function() {
+
+            if (this.files.length > 0) {
+
+                fileName.textContent =
+                    "Selected: " +
+                    this.files[0].name;
+
+            } else {
+
+                fileName.textContent =
+                    "No image selected";
+
+            }
+
+        }
+    );
+
+</script>
+
+
+</body>
+
+</html>

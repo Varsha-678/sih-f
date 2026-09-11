@@ -52,25 +52,29 @@ UNKNOWN_CONFIDENCE_THRESHOLD = 0.65  # If max probability < 0.65, mark as Unknow
 TARGET_ACCURACY_GATE = 0.90
 TARGET_MACRO_F1_GATE = 0.90
 
-# Key Maharashtra Supported Crops & Conditions
+# Key Supported Crops & Conditions (Matching agrirakshak_rice_maize.pt Checkpoint)
 SUPPORTED_CLASSES = [
-    {"class_id": 0, "crop": "Cotton", "condition": "Bacterial Blight (Karpa)", "scientific": "Xanthomonas citri pv. malvacearum", "status": "Diseased", "severity_risk": "High"},
-    {"class_id": 1, "crop": "Cotton", "condition": "Healthy Leaf", "scientific": "Gossypium hirsutum", "status": "Healthy", "severity_risk": "None"},
-    {"class_id": 2, "crop": "Soybean", "condition": "Soybean Rust (Tamba)", "scientific": "Phakopsora pachyrhizi", "status": "Diseased", "severity_risk": "High"},
-    {"class_id": 3, "crop": "Soybean", "condition": "Healthy Leaf", "scientific": "Glycine max", "status": "Healthy", "severity_risk": "None"},
-    {"class_id": 4, "crop": "Sugarcane", "condition": "Red Rot (Kuhila)", "scientific": "Colletotrichum falcatum", "status": "Diseased", "severity_risk": "High"},
-    {"class_id": 5, "crop": "Sugarcane", "condition": "Healthy Cane Leaf", "scientific": "Saccharum officinarum", "status": "Healthy", "severity_risk": "None"},
-    {"class_id": 6, "crop": "Onion", "condition": "Purple Blotch (Jaambhla Karpa)", "scientific": "Alternaria porri", "status": "Diseased", "severity_risk": "Moderate"},
-    {"class_id": 7, "crop": "Onion", "condition": "Healthy Leaf", "scientific": "Allium cepa", "status": "Healthy", "severity_risk": "None"},
-    {"class_id": 8, "crop": "Tomato", "condition": "Early Blight (Lavkar Karpa)", "scientific": "Alternaria solani", "status": "Diseased", "severity_risk": "Moderate"},
-    {"class_id": 9, "crop": "Tomato", "condition": "Late Blight (Ushira Karpa)", "scientific": "Phytophthora infestans", "status": "Diseased", "severity_risk": "High"},
-    {"class_id": 10, "crop": "Tomato", "condition": "Healthy Leaf", "scientific": "Solanum lycopersicum", "status": "Healthy", "severity_risk": "None"},
-    {"class_id": 11, "crop": "Pomegranate", "condition": "Bacterial Blight (Telya)", "scientific": "Xanthomonas axonopodis pv. punicae", "status": "Diseased", "severity_risk": "High"},
-    {"class_id": 12, "crop": "Pomegranate", "condition": "Healthy Leaf", "scientific": "Punica granatum", "status": "Healthy", "severity_risk": "None"},
+    {"class_id": 0, "crop": "Rice/Maize", "condition": "Aphid Infestation", "scientific": "Aphidoidea", "status": "Diseased", "severity_risk": "Moderate"},
+    {"class_id": 1, "crop": "Rice", "condition": "Bacterial Leaf Blight", "scientific": "Xanthomonas oryzae", "status": "Diseased", "severity_risk": "High"},
+    {"class_id": 2, "crop": "Rice", "condition": "Brown Spot", "scientific": "Bipolaris oryzae", "status": "Diseased", "severity_risk": "Moderate"},
+    {"class_id": 3, "crop": "Rice/Maize", "condition": "Curvularia Leaf Spot", "scientific": "Curvularia lunata", "status": "Diseased", "severity_risk": "Moderate"},
+    {"class_id": 4, "crop": "Maize", "condition": "Fall Armyworm", "scientific": "Spodoptera frugiperda", "status": "Diseased", "severity_risk": "High"},
+    {"class_id": 5, "crop": "Maize", "condition": "Fall Armyworm Symptoms", "scientific": "Spodoptera frugiperda", "status": "Diseased", "severity_risk": "High"},
+    {"class_id": 6, "crop": "Rice", "condition": "False Smut", "scientific": "Ustilaginoidea virens", "status": "Diseased", "severity_risk": "Moderate"},
+    {"class_id": 7, "crop": "Rice/Maize", "condition": "Healthy Leaf", "scientific": "Oryza sativa / Zea mays", "status": "Healthy", "severity_risk": "None"},
+    {"class_id": 8, "crop": "Rice", "condition": "Leaf Folder", "scientific": "Cnaphalocrocis medinalis", "status": "Diseased", "severity_risk": "Moderate"},
+    {"class_id": 9, "crop": "Rice", "condition": "Leaf Sheath Blight", "scientific": "Rhizoctonia solani", "status": "Diseased", "severity_risk": "High"},
+    {"class_id": 10, "crop": "Maize", "condition": "Maydis Leaf Blight", "scientific": "Bipolaris maydis", "status": "Diseased", "severity_risk": "High"},
+    {"class_id": 11, "crop": "Rice", "condition": "Rice Skipper", "scientific": "Pelopidas mathias", "status": "Diseased", "severity_risk": "Low"},
+    {"class_id": 12, "crop": "Maize", "condition": "Sorghum Downy Mildew", "scientific": "Peronosclerospora sorghi", "status": "Diseased", "severity_risk": "High"},
+    {"class_id": 13, "crop": "Maize", "condition": "Turcicum Leaf Blight", "scientific": "Exserohilum turcicum", "status": "Diseased", "severity_risk": "High"},
+    {"class_id": 14, "crop": "Rice", "condition": "White Stem Borer", "scientific": "Scirpophaga innotata", "status": "Diseased", "severity_risk": "High"},
+    {"class_id": 15, "crop": "Rice", "condition": "Yellow Stem Borer", "scientific": "Scirpophaga incertulas", "status": "Diseased", "severity_risk": "High"},
 ]
 
-CLASS_NAMES = [f"{item['crop']}___{item['condition'].replace(' ', '_')}" for item in SUPPORTED_CLASSES]
+CLASS_NAMES = [item["condition"] for item in SUPPORTED_CLASSES]
 NUM_CLASSES = len(SUPPORTED_CLASSES)
 
 # Database URL
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'agrirakshak.db'}")
+
